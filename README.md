@@ -1,9 +1,9 @@
-# Jinyan Shao French Input Method
+# Plume Française
 
 Une méthode de saisie macOS native, rapide et entièrement locale, conçue
 exclusivement pour écrire en français.
 
-![Aperçu de Jinyan Shao French Input Method](docs/images/apercu.png)
+![Aperçu de Plume Française](docs/images/apercu.png)
 
 ## Fonctionnalités
 
@@ -24,8 +24,8 @@ exclusivement pour écrire en français.
 
 ## Installation
 
-Téléchargez `JinyanShao-FrenchInputMethod.zip` depuis la page
-[Releases](https://github.com/jinyanshao/JinyanShao-FrenchInputMethod/releases),
+Téléchargez `Plume-Francaise.zip` depuis la page
+[Releases](https://github.com/jinyanshao/Plume-Francaise/releases),
 puis suivez le [guide d’installation détaillé](INSTALLATION.md).
 
 Après l’installation, la méthode de saisie apparaît dans :
@@ -57,10 +57,10 @@ La compilation depuis les sources nécessite Xcode et CocoaPods :
 
 ```sh
 pod install
-open JinyanShaoFrenchInputMethod.xcworkspace
+open PlumeFrancaise.xcworkspace
 ```
 
-Compilez ensuite le schéma `JinyanShaoFrenchInputMethod` en configuration
+Compilez ensuite le schéma `PlumeFrancaise` en configuration
 Release. Le projet produit une application Universal pour Apple Silicon et
 Intel.
 

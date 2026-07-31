@@ -26,15 +26,21 @@
     if (!path)
         path = [[NSBundle bundleForClass:self.class] pathForResource:@"french" ofType:@"sqlite3"];
     if (!path) {
-        NSLog(@"[JinyanShaoFrenchInputMethod] French dictionary not found");
+        NSLog(@"[PlumeFrancaise] French dictionary not found");
         return;
     }
     _frenchDbQueue = [FMDatabaseQueue databaseQueueWithPath:path];
 }
 
 - (void)initSubstitutionDatabase {
-    NSString *supportDir = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support/JinyanShaoFrenchInputMethod"];
-    [[NSFileManager defaultManager] createDirectoryAtPath:supportDir withIntermediateDirectories:YES attributes:nil error:nil];
+    NSString *applicationSupport = [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Application Support"];
+    NSString *supportDir = [applicationSupport stringByAppendingPathComponent:@"PlumeFrancaise"];
+    NSString *legacySupportDir = [applicationSupport stringByAppendingPathComponent:@"JinyanShaoFrenchInputMethod"];
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if (![fileManager fileExistsAtPath:supportDir] && [fileManager fileExistsAtPath:legacySupportDir]) {
+        [fileManager moveItemAtPath:legacySupportDir toPath:supportDir error:nil];
+    }
+    [fileManager createDirectoryAtPath:supportDir withIntermediateDirectories:YES attributes:nil error:nil];
     NSString *dbPath = [supportDir stringByAppendingPathComponent:@"substitutions.sqlite3"];
     _subDbQueue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
     [_subDbQueue inDatabase:^(FMDatabase *db) {

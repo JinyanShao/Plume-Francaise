@@ -2,21 +2,21 @@
 
 login_user=$(/usr/bin/stat -f%Su /dev/console)
 login_uid=$(/usr/bin/id -u "${login_user}")
-app_path="/Library/Input Methods/JinyanShao-FrenchInputMethod.app"
+app_path="/Library/Input Methods/Plume-Francaise.app"
 
-pkill -9 JinyanShaoFrenchInputMethod 2>/dev/null || true
+pkill -9 PlumeFrancaise 2>/dev/null || true
 sleep 1
-pkill -9 JinyanShaoFrenchInputMethod 2>/dev/null || true
+pkill -9 PlumeFrancaise 2>/dev/null || true
 
 launchctl asuser "${login_uid}" sudo -u "${login_user}" killall -HUP cfprefsd 2>/dev/null || true
 launchctl asuser "${login_uid}" sudo -u "${login_user}" \
-    "${app_path}/Contents/MacOS/JinyanShaoFrenchInputMethod" --deactivate 2>/dev/null || true
+    "${app_path}/Contents/MacOS/PlumeFrancaise" --deactivate 2>/dev/null || true
 
 launchctl asuser "${login_uid}" sudo -u "${login_user}" killall -HUP cfprefsd 2>/dev/null || true
 sleep 1
 
 launchctl asuser "${login_uid}" sudo -u "${login_user}" \
-    "${app_path}/Contents/MacOS/JinyanShaoFrenchInputMethod" --install
+    "${app_path}/Contents/MacOS/PlumeFrancaise" --install
 launchctl asuser "${login_uid}" sudo -u "${login_user}" killall -HUP cfprefsd 2>/dev/null || true
 
-echo "Jinyan Shao French Input Method registered and activated successfully" > /tmp/JinyanShaoFrenchInputMethod-postinstall
+echo "Plume Française registered and activated successfully" > /tmp/PlumeFrancaise-postinstall

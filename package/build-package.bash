@@ -4,17 +4,17 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 PROJECT_ROOT=$(cd "${SCRIPT_DIR}/.."; pwd)
-BUILD_ROOT="${BUILD_ROOT:-/tmp/JinyanShaoFrenchInputMethod-package}"
+BUILD_ROOT="${BUILD_ROOT:-/tmp/PlumeFrancaise-package}"
 OUTPUT_DIR="${OUTPUT_DIR:-${PROJECT_ROOT}/..}"
 VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${PROJECT_ROOT}/Info.plist")
-APP_NAME="JinyanShao-FrenchInputMethod.app"
+APP_NAME="Plume-Francaise.app"
 
 rm -rf "${BUILD_ROOT}"
 mkdir -p "${BUILD_ROOT}/root" "${OUTPUT_DIR}"
 
 xcodebuild \
-    -workspace "${PROJECT_ROOT}/JinyanShaoFrenchInputMethod.xcworkspace" \
-    -scheme JinyanShaoFrenchInputMethod \
+    -workspace "${PROJECT_ROOT}/PlumeFrancaise.xcworkspace" \
+    -scheme PlumeFrancaise \
     -configuration Release \
     -destination 'generic/platform=macOS' \
     -derivedDataPath "${BUILD_ROOT}/DerivedData" \
@@ -25,7 +25,7 @@ xcodebuild \
     build
 
 ditto \
-    "${BUILD_ROOT}/DerivedData/Build/Products/Release/JinyanShaoFrenchInputMethod.app" \
+    "${BUILD_ROOT}/DerivedData/Build/Products/Release/PlumeFrancaise.app" \
     "${BUILD_ROOT}/root/${APP_NAME}"
 xattr -cr "${BUILD_ROOT}/root/${APP_NAME}"
 codesign --force --deep --sign - "${BUILD_ROOT}/root/${APP_NAME}"
@@ -38,12 +38,12 @@ sed "s/__POSTINSTALL_ACTION__/${POSTINSTALL_ACTION}/" \
 pkgbuild \
     --info "${BUILD_ROOT}/PackageInfo" \
     --root "${BUILD_ROOT}/root" \
-    --identifier "github.jinyanshao.inputmethod.JinyanShaoFrenchInputMethod" \
+    --identifier "github.jinyanshao.inputmethod.PlumeFrancaise" \
     --version "${VERSION}" \
     --install-location "/Library/Input Methods" \
     --scripts "${SCRIPT_DIR}/scripts" \
-    "${OUTPUT_DIR}/JinyanShao-FrenchInputMethod-${VERSION}.pkg"
+    "${OUTPUT_DIR}/Plume-Francaise-${VERSION}.pkg"
 
 codesign --verify --deep --strict --verbose=2 "${BUILD_ROOT}/root/${APP_NAME}"
-lipo -archs "${BUILD_ROOT}/root/${APP_NAME}/Contents/MacOS/JinyanShaoFrenchInputMethod"
-pkgutil --check-signature "${OUTPUT_DIR}/JinyanShao-FrenchInputMethod-${VERSION}.pkg" || true
+lipo -archs "${BUILD_ROOT}/root/${APP_NAME}/Contents/MacOS/PlumeFrancaise"
+pkgutil --check-signature "${OUTPUT_DIR}/Plume-Francaise-${VERSION}.pkg" || true

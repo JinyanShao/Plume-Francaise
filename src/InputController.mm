@@ -452,7 +452,7 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
 }
 
 - (void)clickAbout:(NSMenuItem *)sender {
-    [self openUrl:@"https://github.com/jinyanshao/JinyanShao-FrenchInputMethod"];
+    [self openUrl:@"https://github.com/jinyanshao/Plume-Francaise"];
 }
 
 - (void)openUrl:(NSString *)url {

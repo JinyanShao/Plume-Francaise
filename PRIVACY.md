@@ -2,7 +2,7 @@
 
 Date d’entrée en vigueur : 28 juillet 2026
 
-Jinyan Shao French Input Method fonctionne localement sur macOS.
+Plume Française fonctionne localement sur macOS.
 
 ## Données traitées
 
@@ -34,7 +34,7 @@ de saisie. Les substitutions personnelles restent sur le Mac jusqu’à leur
 suppression depuis les préférences ou jusqu’à la suppression du dossier :
 
 ```text
-~/Library/Application Support/JinyanShaoFrenchInputMethod
+~/Library/Application Support/PlumeFrancaise
 ```
 
 ## Contact

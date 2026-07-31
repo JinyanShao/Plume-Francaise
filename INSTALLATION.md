@@ -7,12 +7,12 @@
 
 ## Installation depuis GitHub
 
-1. Téléchargez `JinyanShao-FrenchInputMethod-1.0.0.pkg` depuis la page Releases.
+1. Téléchargez `Plume-Francaise-1.0.0.pkg` depuis la page Releases.
 2. Ouvrez le paquet et suivez les étapes de l’installateur.
 3. Ouvrez **Réglages Système → Clavier → Sources d’entrée**.
-4. Ajoutez **Jinyan Shao French Input Method** dans la section Français si elle n’est pas déjà active.
+4. Ajoutez **Plume Française** dans la section Français si elle n’est pas déjà active.
 
-L’archive `JinyanShao-FrenchInputMethod.zip` reste disponible pour une
+L’archive `Plume-Francaise.zip` reste disponible pour une
 installation manuelle dans `~/Library/Input Methods`.
 
 Si le dossier `Input Methods` n’existe pas, créez-le dans le dossier
@@ -25,9 +25,9 @@ exécutez :
 
 ```sh
 mkdir -p "$HOME/Library/Input Methods"
-ditto JinyanShao-FrenchInputMethod.app "$HOME/Library/Input Methods/JinyanShao-FrenchInputMethod.app"
-xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/JinyanShao-FrenchInputMethod.app"
-"$HOME/Library/Input Methods/JinyanShao-FrenchInputMethod.app/Contents/MacOS/JinyanShaoFrenchInputMethod" --install
+ditto Plume-Francaise.app "$HOME/Library/Input Methods/Plume-Francaise.app"
+xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/Plume-Francaise.app"
+"$HOME/Library/Input Methods/Plume-Francaise.app/Contents/MacOS/PlumeFrancaise" --install
 ```
 
 Ouvrez ensuite de nouveau les réglages des sources d’entrée.
@@ -35,7 +35,7 @@ Ouvrez ensuite de nouveau les réglages des sources d’entrée.
 ## Première utilisation
 
 Sélectionnez l’icône de saisie dans la barre des menus, puis choisissez
-**Jinyan Shao French Input Method**. Essayez `ecole`, `jaime` ou `nous all`.
+**Plume Française**. Essayez `ecole`, `jaime` ou `nous all`.
 
 ## Mise à jour
 
@@ -46,9 +46,9 @@ reconnectez-vous à votre compte macOS.
 ## Désinstallation
 
 Retirez d’abord la source d’entrée dans les Réglages Système, puis placez
-`~/Library/Input Methods/JinyanShao-FrenchInputMethod.app` dans la Corbeille.
+`~/Library/Input Methods/Plume-Francaise.app` dans la Corbeille.
 Les substitutions personnelles se trouvent dans :
 
 ```text
-~/Library/Application Support/JinyanShaoFrenchInputMethod
+~/Library/Application Support/PlumeFrancaise
 ```

@@ -2,8 +2,8 @@
 
 xcodebuild -version
 clang -v
-rm -rf /tmp/JinyanShaoFrenchInputMethod
+rm -rf /tmp/PlumeFrancaise
 
-xcodebuild clean -workspace JinyanShaoFrenchInputMethod.xcworkspace/ -scheme JinyanShaoFrenchInputMethod
+xcodebuild clean -workspace PlumeFrancaise.xcworkspace/ -scheme PlumeFrancaise
 
-xcodebuild -workspace JinyanShaoFrenchInputMethod.xcworkspace/ -scheme JinyanShaoFrenchInputMethod -destination "generic/platform=macOS,name=Any Mac" -configuration "Release" CONFIGURATION_BUILD_DIR=/tmp/JinyanShaoFrenchInputMethod/build/release BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+xcodebuild -workspace PlumeFrancaise.xcworkspace/ -scheme PlumeFrancaise -destination "generic/platform=macOS,name=Any Mac" -configuration "Release" CONFIGURATION_BUILD_DIR=/tmp/PlumeFrancaise/build/release BUILD_LIBRARY_FOR_DISTRIBUTION=YES

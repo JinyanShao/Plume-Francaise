@@ -1,6 +1,6 @@
 ### COPYING
 
-Jinyan Shao French Input Method is licensed under the GPLv3 (GNU GENERAL PUBLIC LICENSE Version 3).
+Plume Française is licensed under the GPLv3 (GNU GENERAL PUBLIC LICENSE Version 3).
 See the [LICENSE](LICENSE) file for details.
 
 French conjugation data is derived from Morphalou 3.1, maintained by

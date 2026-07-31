@@ -19,7 +19,7 @@
                BlueprintIdentifier = "3802CD7822CE034100A7E2F9"
                BuildableName = "Tests.xctest"
                BlueprintName = "Tests"
-               ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+               ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

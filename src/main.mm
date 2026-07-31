@@ -7,10 +7,10 @@
 NSUserDefaults *preference;
 ConversionEngine *engine;
 
-const NSString *kConnectionName = @"JinyanShaoFrenchInputMethod_Connection";
+const NSString *kConnectionName = @"PlumeFrancaise_Connection";
 IMKCandidates *sharedCandidates;
 
-static NSString *const kSourceID = @"github.jinyanshao.inputmethod.JinyanShaoFrenchInputMethod";
+static NSString *const kSourceID = @"github.jinyanshao.inputmethod.PlumeFrancaise";
 
 void registerInputSource() {
     NSURL *bundleURL = [NSBundle mainBundle].bundleURL;

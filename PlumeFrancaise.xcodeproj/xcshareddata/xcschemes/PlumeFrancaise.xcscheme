@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D1107260486CEB800E47090"
-               BuildableName = "JinyanShaoFrenchInputMethod.app"
-               BlueprintName = "JinyanShaoFrenchInputMethod"
-               ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+               BuildableName = "PlumeFrancaise.app"
+               BlueprintName = "PlumeFrancaise"
+               ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -43,8 +43,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "49347168B5DCF7A966B2EFDBEC509FB1"
-               BuildableName = "Pods_JinyanShaoFrenchInputMethod.framework"
-               BlueprintName = "Pods-JinyanShaoFrenchInputMethod"
+               BuildableName = "Pods_PlumeFrancaise.framework"
+               BlueprintName = "Pods-PlumeFrancaise"
                ReferencedContainer = "container:Pods/Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -63,7 +63,7 @@
                BlueprintIdentifier = "3802CD7822CE034100A7E2F9"
                BuildableName = "Tests.xctest"
                BlueprintName = "Tests"
-               ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+               ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -71,9 +71,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "JinyanShaoFrenchInputMethod.app"
-            BlueprintName = "JinyanShaoFrenchInputMethod"
-            ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+            BuildableName = "PlumeFrancaise.app"
+            BlueprintName = "PlumeFrancaise"
+            ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -94,9 +94,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "JinyanShaoFrenchInputMethod.app"
-            BlueprintName = "JinyanShaoFrenchInputMethod"
-            ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+            BuildableName = "PlumeFrancaise.app"
+            BlueprintName = "PlumeFrancaise"
+            ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -113,9 +113,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D1107260486CEB800E47090"
-            BuildableName = "JinyanShaoFrenchInputMethod.app"
-            BlueprintName = "JinyanShaoFrenchInputMethod"
-            ReferencedContainer = "container:JinyanShaoFrenchInputMethod.xcodeproj">
+            BuildableName = "PlumeFrancaise.app"
+            BlueprintName = "PlumeFrancaise"
+            ReferencedContainer = "container:PlumeFrancaise.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -1,4 +1,4 @@
-# Jinyan Shao French Input Method 1.0.0
+# Plume Française 1.0.0
 
 Première version publique de la méthode de saisie française native pour macOS.
 
@@ -16,7 +16,7 @@ Première version publique de la méthode de saisie française native pour macOS
 
 ## Installation
 
-1. Téléchargez `JinyanShao-FrenchInputMethod-1.0.0.pkg`.
+1. Téléchargez `Plume-Francaise-1.0.0.pkg`.
 2. Ouvrez le paquet et suivez les étapes de l’installateur.
 3. Activez la méthode dans **Réglages Système → Clavier → Sources d’entrée** si nécessaire.
 
@@ -28,9 +28,9 @@ Le guide complet et la procédure d’enregistrement manuel se trouvent dans
 
 ## Fichiers de la publication
 
-- `JinyanShao-FrenchInputMethod-1.0.0.pkg` — paquet d’installation macOS
-- `JinyanShao-FrenchInputMethod.zip` — application Universal prête à installer
-- `JinyanShao-FrenchInputMethod-source.zip` — archive complète du code source
+- `Plume-Francaise-1.0.0.pkg` — paquet d’installation macOS
+- `Plume-Francaise.zip` — application Universal prête à installer
+- `Plume-Francaise-source.zip` — archive complète du code source
 - `SHA256SUMS.txt` — empreintes SHA-256 des trois fichiers distribués
 
 ## Vérifications
