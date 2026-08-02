@@ -1,7 +1,9 @@
 # Plume Française
 
-Une méthode de saisie macOS native, rapide et entièrement locale, conçue
-exclusivement pour écrire en français.
+Native, local-first French text-input tool for macOS.
+
+*Une méthode de saisie macOS native, rapide et entièrement locale, conçue
+exclusivement pour écrire en français.*
 
 ![Aperçu de Plume Française](docs/images/apercu.png)
 
