@@ -1,222 +1,167 @@
 # Plume Française
 
-A native, local-first macOS French input method that helps people write accurate French without sending typed text to a server.
+Plume Française is a native macOS input method for writing French with accents, typographic punctuation, spelling corrections, and context-aware suggestions. It works locally on the Mac.
 
-## Overview
+## See It in Action
 
-Plume Française is a desktop application designed to help French writers enter accented words, French punctuation, and common verb forms more naturally on macOS.
+![Plume Française suggesting French text](docs/images/apercu.png)
 
-The project focuses on:
-
-* Accent completion, spelling assistance, and French typographic punctuation
-* Frequency- and context-aware candidate suggestions
-* Local-only dictionaries, personal substitutions, and recent context
-* Universal macOS support for Apple Silicon and Intel Macs
-
-## Problem
-
-Writing French quickly on a standard keyboard often requires repeated character switching for accents, apostrophes, and spacing before punctuation. Common missing accents and letter transpositions also interrupt writing flow.
-
-Input methods process highly sensitive content. A French writing assistant should remain useful without uploading a person's typed text or context history to an external service.
-
-Typical challenges include:
-
-* Entering accented French words efficiently
-* Applying French apostrophes and spacing conventions consistently
-* Recovering from common accent omissions and spelling transpositions
-* Preserving the privacy of typed text and learned context
-
-## Solution
-
-The system addresses these challenges by providing:
-
-* Accent completion such as `ecole` → `école` and typographic apostrophes such as `jaime` → `j’aime`
-* French spacing before `;`, `:`, `!`, and `?`, plus corrections for common typing errors
-* Ranked suggestions using frequency, previous words, and subject-aware verb conjugation
-* A local dictionary and local learning context with no server transmission
-
-## Current Status
-
-### Implemented
-
-* Native macOS InputMethodKit application compatible with macOS 13.5+ on Apple Silicon and Intel
-* Accent, apostrophe, punctuation, and common typo assistance
-* 405 frequent verbs in present, passé composé, imparfait, and futur simple
-* Local candidate ranking, local user substitutions, unit tests, formatting, and release build scripts
-
-### In Progress
-
-* Continued refinement of conversion and suggestion behavior through regression tests
-
-### Planned
-
-* Additional dictionary and conjugation coverage
-* Further usability refinements based on real writing workflows
-
-Planned capabilities are not included in the current release unless explicitly marked as implemented.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    User[macOS writer] --> IM[InputMethodKit controller]
-    IM --> Engine[Conversion and candidate engine]
-    Engine --> Dictionary[French dictionary and conjugation data]
-    Engine --> Context[Local context and substitutions]
-    Engine --> Candidate[macOS candidate window]
-```
-
-### Main Components
-
-| Component | Responsibility |
-| --- | --- |
-| Input controller | Receives macOS input events and presents candidates |
-| Conversion engine | Produces corrections, completions, and ranked suggestions |
-| Dictionary data | Supplies French vocabulary and conjugation information |
-| Local context | Stores personal substitutions and recent context on the Mac |
-| Preferences interface | Provides user-facing configuration for the input method |
-
-## Key Engineering Decisions
-
-### Local-first text processing
-
-**Decision:** Typed text, candidates, substitutions, and recent context remain on the user's Mac.
-
-**Reason:** An input method handles sensitive content and should not depend on a remote service for ordinary writing assistance.
-
-**Trade-off:** Dictionaries and language rules are packaged and updated with the application rather than learned from a cloud service.
-
-### Native InputMethodKit implementation
-
-**Decision:** The application uses macOS InputMethodKit and Objective-C++ rather than a browser-based or remote input solution.
-
-**Reason:** Native integration is required to participate in macOS input-source selection and candidate handling.
-
-**Trade-off:** The project is macOS-specific and requires Xcode/CocoaPods for source builds.
-
-## Technology Stack
-
-| Area | Technology |
-| --- | --- |
-| Language | Objective-C++ |
-| Framework | macOS InputMethodKit, AppKit |
-| Database | Local dictionary and preference data; no server database |
-| Testing | Native unit-test scripts |
-| Packaging | Universal macOS application, CocoaPods |
-| CI/CD | Local formatting, test, and build scripts |
-
-## Repository Structure
+Type without stopping to enter every accent, then choose the intended candidate:
 
 ```text
-.
-├── src/                 # Input controller and conversion engine
-├── dictionary/          # French dictionary and conjugation data
-├── Tests/               # Native unit tests
-├── docs/                # Screenshots and release documentation
-├── package/             # Packaging scripts
-├── PlumeFrancaise.xcworkspace
-├── build.sh
-└── README.md
+ecole       →  école
+jaime       →  j’aime
+nous all    →  nous allons
 ```
 
-## Getting Started
+## Features
 
-### Prerequisites
+- Completes missing accents and preserves the input's capitalization.
+- Converts French elisions to the typographic apostrophe (`’`).
+- Applies French spacing before `;`, `:`, `!`, and `?`.
+- Suggests spelling corrections for missing accents, transposed letters, and common mistakes.
+- Suggests conjugations for 405 common verbs in the present, passé composé, imparfait, and futur simple.
+- Uses the preceding subject or object pronoun to rank relevant verb forms.
+- Supports personal substitutions stored on the Mac.
+- Runs natively on both Apple Silicon and Intel Macs.
 
-* macOS 13.5+
-* Xcode and CocoaPods
-* Git
+## Installation
 
-### Installation
+Plume Française requires macOS 13.5 or later.
 
-```bash
+1. Download `Plume-Francaise-1.0.0.pkg` from the [Releases page](https://github.com/JinyanShao/Plume-Francaise/releases).
+2. Open the package and follow the installer.
+3. Open **System Settings → Keyboard → Input Sources**.
+4. Add **Plume Française** under French if it is not already enabled.
+5. Select Plume Française from the input menu in the macOS menu bar.
+
+A ZIP archive is also available for manual installation in `~/Library/Input Methods`. See [INSTALLATION.md](INSTALLATION.md) for manual registration, updating, and uninstalling.
+
+## Usage
+
+Start typing in any application after selecting Plume Française as the active input source. The candidate window updates as you type.
+
+- Press the up or down arrow to move through candidates.
+- Press a number from `1` to `9` to select a candidate on the current page.
+- Press Space to commit the current candidate and insert a space.
+- Press Return to commit without adding a space.
+- Press Escape to cancel the current composition.
+
+French punctuation is formatted when committed. For example, typing `bonjour!` produces a narrow non-breaking space before the exclamation mark.
+
+Personal substitutions can be managed from the input method's preferences. Their keys are matched without regard to accents or capitalization.
+
+## More Examples
+
+| Input | Suggested output | What it demonstrates |
+| --- | --- | --- |
+| `ecole` | `école` | Missing accent |
+| `jaime` | `j’aime` | Elision and typographic apostrophe |
+| `ca` | `ça` | French spelling ranked before less likely alternatives |
+| `nous all` | `nous allons` | Subject-aware conjugation |
+| `je suis all` | `je suis allé` | Passé composé suggestion |
+| `bonjour!` | `bonjour ! ` | French punctuation spacing |
+
+Suggestions depend on the available dictionary entries and the recent words in the current typing session.
+
+## Privacy
+
+Plume Française does not send typed text, candidate queries, or writing context to a remote service. Conversion and ranking use the dictionary bundled with the application.
+
+Personal substitutions are stored locally in:
+
+```text
+~/Library/Application Support/PlumeFrancaise/substitutions.sqlite3
+```
+
+Recent words used for contextual ranking are kept in the running input-method process. There is no account, cloud synchronization, analytics service, or remote language model involved in text conversion.
+
+See [PRIVACY.md](PRIVACY.md) for the project's privacy statement.
+
+## How It Works
+
+```text
+keyboard input
+    → InputMethodKit controller
+    → conversion engine
+    → bundled French dictionary + recent local context
+    → macOS candidate window
+    → selected text inserted into the active application
+```
+
+The `InputController` receives key events from macOS and manages composition, punctuation, recent words, and candidate selection. `ConversionEngine` normalizes the input and combines exact dictionary matches, personal substitutions, conjugations, spelling corrections, and context predictions into a deduplicated candidate list.
+
+The dictionary is a bundled SQLite database. Conjugation data is derived from Morphalou 3.1; the import and database-building scripts live in `dictionary/`.
+
+## Building from Source
+
+You need macOS, Xcode, CocoaPods, and Git.
+
+```sh
 git clone https://github.com/JinyanShao/Plume-Francaise.git
 cd Plume-Francaise
 pod install
 open PlumeFrancaise.xcworkspace
 ```
 
-### Configuration
+Build the `PlumeFrancaise` scheme in Xcode, or create a Release build from the command line:
 
-No credentials or environment file are required. After building, add the input method in **System Settings → Keyboard → Input Sources**.
-
-### Run Locally
-
-Build the `PlumeFrancaise` scheme in Release configuration from Xcode, or run:
-
-```bash
+```sh
 bash build.sh
 ```
 
+The script writes build output under `/tmp/PlumeFrancaise`. To build an installer package, run:
+
+```sh
+bash package/build-package.bash
+```
+
+No credentials or environment file are required.
+
+## Architecture
+
+The application is written in Objective-C and Objective-C++ on top of InputMethodKit and AppKit.
+
+- `src/InputController.mm` handles macOS input events, composition, and the candidate window.
+- `src/ConversionEngine.mm` performs normalization, lookup, correction, conjugation, and ranking.
+- `dictionary/french.sqlite3` contains the vocabulary, frequency, context, and conjugation data used at runtime.
+- `web/` and `src/WebServer.m` provide the local preferences interface over a loopback-only web server.
+- `package/` contains the macOS installer scripts.
+
+Runtime dependencies are managed with CocoaPods: FMDB for SQLite access, GCDWebServer for the local preferences interface, and MDCDamerauLevenshtein for spelling-distance calculations.
+
 ## Testing
 
-Run the complete automated test suite:
+Run the native test suite with:
 
-```bash
+```sh
 sh unit-tests.sh
 ```
 
-Run quality checks and a build:
+Source formatting and a Release build can be checked separately:
 
-```bash
+```sh
 sh format-code.sh
 bash build.sh
 ```
 
-## Example Workflow
+The regression tests cover normalization, accent and apostrophe handling, conjugation ranking, contextual suggestions, candidate selection, and punctuation behavior.
 
-1. A user enables Plume Française in macOS Input Sources.
-2. The user types an unaccented word or the beginning of a French word.
-3. The conversion engine creates and ranks local suggestions.
-4. The user selects a candidate with a number key.
-5. The selected French text is inserted without sending typed content to a server.
+## Compatibility
 
-For example, `ecole` suggests `école`, and `nous` followed by `all` prioritizes `allons`.
+- macOS 13.5 or later
+- Apple Silicon and Intel Macs
+- French input through macOS InputMethodKit
 
-## Reliability and Safety
+Plume Française is macOS-specific and is not available for Windows, Linux, iOS, or Android.
 
-The project includes the following reliability measures where applicable:
+## Known Limitations
 
-* Local-only processing of typed text and context
-* Native unit tests and build verification scripts
-* Explicit dictionary and licensing attribution
-* Universal application support for Apple Silicon and Intel
-* No committed credentials or network dependency for text processing
-
-## Limitations
-
-The current version does not yet include:
-
-* Support for operating systems other than macOS
-* Cloud synchronization of personal dictionary or context
-* Coverage of every French verb, vocabulary item, or language variation
-
-These limitations are documented intentionally to distinguish implemented functionality from future work.
-
-## Roadmap
-
-* [ ] Extend reviewed dictionary and conjugation coverage
-* [ ] Add regression cases for real writing workflows
-* [ ] Refine candidate ranking from local product feedback
-
-## Documentation
-
-Additional documentation is available in the repository:
-
-* Installation guide
-* Privacy policy
-* Changelog and release notes
-* Licensing and third-party attribution
+- The bundled dictionary does not cover every French word, regional spelling, or specialist term.
+- Conjugation suggestions are limited to the included verbs and tenses.
+- Personal substitutions and context do not synchronize between Macs.
+- Some applications handle third-party input methods differently; candidate-window placement and key handling may vary.
 
 ## Licence
 
-This project is licensed under GNU GPL v3.0. See `COPYING.md` and `LICENSE` for details. Conjugation data derived from Morphalou 3.1 retains its stated LGPL-LR licensing.
-
-## Author
-
-Jinyan Shao<br>
-Software Engineer — Business Applications, Backend and Automation
-
-* Website: [https://jinyanshao.ch](https://jinyanshao.ch/)
-* GitHub: [https://github.com/JinyanShao](https://github.com/JinyanShao)
-* LinkedIn: [https://www.linkedin.com/in/jinyanshao/](https://www.linkedin.com/in/jinyanshao/)
+Plume Française is licensed under the GNU GPL v3.0. See [COPYING.md](COPYING.md) and [LICENSE](LICENSE). Conjugation data derived from Morphalou 3.1 retains its stated LGPL-LR licensing.

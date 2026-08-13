@@ -4,6 +4,7 @@
 
 @interface InputController (Tests)
 - (BOOL)onKeyEvent:(NSEvent *)event client:(id)sender;
+- (NSArray *)candidates:(id)sender;
 - (void)candidateSelectionChanged:(NSAttributedString *)candidateString;
 @end
 
@@ -211,10 +212,32 @@
     XCTAssertEqualObjects(merged, (@[ @"vais", @"allons", @"aller" ]));
 }
 
-- (void)testConjugationsRankBeforeGenericPrefixMatches {
+- (void)testFrequencyRankedWordsLeadWithoutSubjectContext {
     NSArray *candidates = [self.engine getFrenchCandidates:@"all"];
-    XCTAssertLessThan([candidates indexOfObject:@"vais"], [candidates indexOfObject:@"aller"]);
+    XCTAssertLessThan([candidates indexOfObject:@"aller"], [candidates indexOfObject:@"vais"]);
     XCTAssertEqual(candidates.count, [NSSet setWithArray:candidates].count);
+}
+
+- (void)testExactCommonWordStaysFirstWithContext {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller recordCommittedWord:@"hier"];
+    [controller setOriginalBuffer:@"je"];
+
+    NSArray *candidates = [controller candidates:nil];
+
+    XCTAssertEqualObjects(candidates.firstObject, @"je");
+    XCTAssertLessThan([candidates indexOfObject:@"jeune"], [candidates indexOfObject:@"jetons"]);
+    XCTAssertLessThan([candidates indexOfObject:@"jeu"], [candidates indexOfObject:@"jetons"]);
+}
+
+- (void)testContextConjugationStillLeadsForPrefix {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller recordCommittedWord:@"nous"];
+    [controller setOriginalBuffer:@"all"];
+
+    NSArray *candidates = [controller candidates:nil];
+
+    XCTAssertEqualObjects(candidates.firstObject, @"allons");
 }
 
 - (void)testNormalization {

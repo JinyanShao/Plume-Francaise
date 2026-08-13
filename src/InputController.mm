@@ -395,7 +395,18 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         NSArray *conjugations = [engine getFrenchConjugations:originalInput context:ctx maxResults:8];
         NSArray *predictions = [engine predictFrenchWordsForContext:ctx prefixFilter:originalInput maxResults:5];
         if (conjugations.count > 0 || predictions.count > 0) {
-            NSArray *result = [engine mergeFrenchCandidateGroups:@[ conjugations, predictions, candidateList ] maxResults:50];
+            NSString *firstCandidate = candidateList.firstObject;
+            BOOL firstCandidateIsExact = firstCandidate.length > 0 &&
+                [[engine normalizeFrenchText:firstCandidate] isEqualToString:[engine normalizeFrenchText:originalInput]];
+            NSArray *exactMatch = firstCandidateIsExact ? @[ firstCandidate ] : @[];
+            NSArray *remainingCandidates = firstCandidateIsExact && candidateList.count > 1
+                ? [candidateList subarrayWithRange:NSMakeRange(1, candidateList.count - 1)]
+                : candidateList;
+            NSArray *rankedGroups = firstCandidateIsExact
+                ? @[ exactMatch, predictions, remainingCandidates, conjugations ]
+                : @[ conjugations, predictions, remainingCandidates ];
+            NSArray *result = [engine mergeFrenchCandidateGroups:rankedGroups
+                                                          maxResults:50];
             _candidates = [NSMutableArray arrayWithArray:result];
             return result;
         }
