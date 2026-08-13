@@ -253,8 +253,8 @@
         substitution ? @[ substitution ] : @[],
         exactMatches,
         elided ? @[ elided ] : @[],
-        conjugations,
         prefixMatches,
+        conjugations,
         corrections,
         @[ originalInput ],
     ]

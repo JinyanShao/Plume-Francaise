@@ -23,8 +23,19 @@ Pods/
 .idea/
 .vscode/
 node_modules/
+.venv/
+venv/
+env/
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 *.dmg
 *.pkg
 *.sqlite3-shm
 *.sqlite3-wal
+*.log
