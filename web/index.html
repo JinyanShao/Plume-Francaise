@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plume Francaise Preferences</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="icon.png" alt="" width="64" height="64">
+      <div>
+        <p class="eyebrow">Plume Francaise</p>
+        <h1>Preferences</h1>
+      </div>
+    </header>
+
+    <section aria-labelledby="typing-title">
+      <div>
+        <h2 id="typing-title">Typing</h2>
+        <p>Choose how committed candidates behave while writing.</p>
+      </div>
+      <label class="toggle">
+        <input id="commitWordWithSpace" type="checkbox">
+        <span>
+          <strong>Commit word with Space</strong>
+          <small>Add a space after accepting the current candidate with Space.</small>
+        </span>
+      </label>
+    </section>
+
+    <section aria-labelledby="substitutions-title">
+      <div>
+        <h2 id="substitutions-title">Personal substitutions</h2>
+        <p>Add words or phrases Plume Francaise should suggest locally on this Mac.</p>
+      </div>
+
+      <form id="substitutionForm" class="substitution-form">
+        <label>
+          <span>Input</span>
+          <input id="substitutionKey" name="key" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Suggestion</span>
+          <input id="substitutionValue" name="value" autocomplete="off" required>
+        </label>
+        <button type="submit">Add</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Input</th>
+            <th>Suggestion</th>
+            <th><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="substitutions"></tbody>
+      </table>
+      <p id="emptyState" class="empty">No personal substitutions yet.</p>
+    </section>
+
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>
