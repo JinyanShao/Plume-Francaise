@@ -1,8 +1,8 @@
 #import "WebServer.h"
 #import "ConversionEngine.h"
 #import "GCDWebServer.h"
+#import "GCDWebServerDataRequest.h"
 #import "GCDWebServerDataResponse.h"
-#import "GCDWebServerURLEncodedFormRequest.h"
 
 extern NSUserDefaults *preference;
 extern ConversionEngine *engine;
@@ -51,7 +51,7 @@ static int port = 62718;
 
     [webServer addHandlerForMethod:@"POST"
                               path:@"/preference"
-                      requestClass:[GCDWebServerURLEncodedFormRequest class]
+                      requestClass:[GCDWebServerDataRequest class]
                       processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
                           NSDictionary *data = ((GCDWebServerDataRequest *)request).jsonObject;
 
