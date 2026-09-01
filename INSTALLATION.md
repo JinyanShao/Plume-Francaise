@@ -1,9 +1,9 @@
 # Installation
 
-> **Technical preview:** cette version est actuellement non signée avec un
-> certificat Developer ID, utilise une signature ad hoc et n’est pas notarized
-> par Apple. Elle est destinée à des personnes à l’aise avec l’examen et
-> l’exécution de logiciels macOS open source en préversion technique.
+> **Technical preview:** la version actuelle utilise une signature ad hoc et
+> n’est pas notarized par Apple. Elle est destinée à des personnes à l’aise avec
+> l’examen et l’exécution de logiciels macOS open source en préversion
+> technique.
 
 ## Configuration requise
 
@@ -36,10 +36,18 @@ ditto Plume-Francaise.app "$HOME/Library/Input Methods/Plume-Francaise.app"
 
 Ouvrez ensuite de nouveau les réglages des sources d’entrée.
 
+## Dépannage pour les utilisateurs qui comprennent les implications
+
 Si macOS bloque l’ouverture de l’application, cela est attendu pour une version
-non signée avec Developer ID et non notarized. Ne désactivez les protections de
-quarantaine que si vous comprenez l’implication de sécurité et faites confiance
-à l’archive téléchargée.
+ad-hoc signed et non notarized. La suppression de l’attribut de quarantaine ne
+fait pas partie de l’installation standard.
+
+Si vous comprenez l’implication de sécurité et faites confiance à l’archive
+téléchargée, vous pouvez retirer l’attribut de quarantaine manuellement :
+
+```sh
+xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/Plume-Francaise.app"
+```
 
 ## Première utilisation
 
