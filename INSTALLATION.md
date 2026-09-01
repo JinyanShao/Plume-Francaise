@@ -1,5 +1,10 @@
 # Installation
 
+> **Technical preview:** cette version est actuellement non signée avec un
+> certificat Developer ID, utilise une signature ad hoc et n’est pas notarized
+> par Apple. Elle est destinée à des personnes à l’aise avec l’examen et
+> l’exécution de logiciels macOS open source en préversion technique.
+
 ## Configuration requise
 
 - macOS 13.5 ou version ultérieure
@@ -26,11 +31,15 @@ exécutez :
 ```sh
 mkdir -p "$HOME/Library/Input Methods"
 ditto Plume-Francaise.app "$HOME/Library/Input Methods/Plume-Francaise.app"
-xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/Plume-Francaise.app"
 "$HOME/Library/Input Methods/Plume-Francaise.app/Contents/MacOS/PlumeFrancaise" --install
 ```
 
 Ouvrez ensuite de nouveau les réglages des sources d’entrée.
+
+Si macOS bloque l’ouverture de l’application, cela est attendu pour une version
+non signée avec Developer ID et non notarized. Ne désactivez les protections de
+quarantaine que si vous comprenez l’implication de sécurité et faites confiance
+à l’archive téléchargée.
 
 ## Première utilisation
 
