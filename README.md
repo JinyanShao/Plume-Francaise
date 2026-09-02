@@ -1,5 +1,7 @@
 # Plume Française
 
+[![CI](https://github.com/JinyanShao/Plume-Francaise/actions/workflows/ci.yml/badge.svg)](https://github.com/JinyanShao/Plume-Francaise/actions/workflows/ci.yml)
+
 Plume Française is a native macOS input method for writing French with accents, typographic punctuation, spelling corrections, and context-aware suggestions. It works locally on the Mac.
 
 ## See It in Action
