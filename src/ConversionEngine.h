@@ -1,6 +1,6 @@
 #import "FMDB.h"
 #import <Cocoa/Cocoa.h>
-#import <MDCDamerauLevenshtein/MDCDamerauLevenshtein.h>
+#import "MDCDamerauLevenshtein.h"
 
 @interface ConversionEngine : NSObject
 

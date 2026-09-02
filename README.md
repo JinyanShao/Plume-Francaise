@@ -135,7 +135,7 @@ Runtime dependencies are managed with CocoaPods: FMDB for SQLite access, GCDWebS
 Run the native test suite with:
 
 ```sh
-sh unit-tests.sh
+bash unit-tests.sh
 ```
 
 Source formatting and a Release build can be checked separately:
