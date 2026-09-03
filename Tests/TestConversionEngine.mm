@@ -321,6 +321,27 @@
     XCTAssertFalse([controller onKeyEvent:event client:nil]);
 }
 
+- (void)testApostropheExtendsCompositionInsteadOfCommitting {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"c"];
+
+    NSEvent *apostrophe = [NSEvent keyEventWithType:NSEventTypeKeyDown
+                                            location:NSZeroPoint
+                                       modifierFlags:0
+                                           timestamp:0
+                                        windowNumber:0
+                                             context:nil
+                                          characters:@"'"
+                         charactersIgnoringModifiers:@"'"
+                                           isARepeat:NO
+                                             keyCode:39];
+
+    // Typing straight through an elision (e.g. "c" + "'" + "est") should keep composing,
+    // not commit "c'" to the document and force starting a new word from scratch.
+    XCTAssertTrue([controller onKeyEvent:apostrophe client:nil]);
+    XCTAssertEqualObjects([controller originalBuffer], @"c’");
+}
+
 - (void)testCandidateIndexResetsWhenCandidateListRebuilds {
     TestInputController *controller = [[TestInputController alloc] init];
     [controller setOriginalBuffer:@"ecole"];

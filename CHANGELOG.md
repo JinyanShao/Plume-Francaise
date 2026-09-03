@@ -17,6 +17,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   `cont` affiché comme `continue`) tant que l'utilisateur n'a pas
   explicitement navigué avec les flèches ; le texte affiché correspond
   désormais à ce qui a été réellement tapé jusqu'à une sélection explicite
+- Taper l'apostrophe (`'`) en cours de composition (par exemple `c` puis `'`)
+  ne valide plus immédiatement `c'` en fermant la fenêtre de candidats ;
+  l'apostrophe prolonge maintenant la composition comme une lettre normale,
+  pour continuer à taper `c'est`, `c'était`… et valider soi-même avec
+  Espace ou Retour
 
 ## 1.1.0 — 3 septembre 2026
 
