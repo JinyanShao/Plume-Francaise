@@ -2,7 +2,7 @@
 
 Toutes les modifications importantes sont documentées dans ce fichier.
 
-## Non publié
+## 1.1.0 — 3 septembre 2026
 
 ### Ajouts
 

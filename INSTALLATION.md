@@ -12,7 +12,7 @@
 
 ## Installation depuis GitHub
 
-1. Téléchargez `Plume-Francaise-1.0.0.pkg` depuis la page Releases.
+1. Téléchargez `Plume-Francaise-1.1.0.pkg` depuis la page Releases.
 2. Ouvrez le paquet et suivez les étapes de l’installateur.
 3. Ouvrez **Réglages Système → Clavier → Sources d’entrée**.
 4. Ajoutez **Plume Française** dans la section Français si elle n’est pas déjà active.
