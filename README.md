@@ -31,7 +31,7 @@ nous all    →  nous allons
 
 Plume Française requires macOS 13.5 or later.
 
-1. Download `Plume-Francaise-1.0.0.pkg` from the [Releases page](https://github.com/JinyanShao/Plume-Francaise/releases).
+1. Download `Plume-Francaise-1.1.0.pkg` from the [Releases page](https://github.com/JinyanShao/Plume-Francaise/releases).
 2. Open the package and follow the installer.
 3. Open **System Settings → Keyboard → Input Sources**.
 4. Add **Plume Française** under French if it is not already enabled.
