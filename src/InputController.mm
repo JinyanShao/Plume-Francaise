@@ -159,9 +159,12 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     }
 
     if (hasBufferedText && [self isFrenchApostrophe:characters]) {
-        [self setComposedBuffer:bufferedText];
-        [self appendToComposedBuffer:@"’"];
-        [self commitCompositionWithoutSpace:sender];
+        // Extend the composition instead of committing immediately, so typing straight
+        // through an elision (e.g. "c" + "'" + "est") keeps showing candidates for the
+        // whole thing rather than dropping "c'" into the document and starting over.
+        [self originalBufferAppend:@"’" client:sender];
+        [sharedCandidates updateCandidates];
+        [sharedCandidates show:kIMKLocateCandidatesBelowHint];
         return YES;
     }
 
