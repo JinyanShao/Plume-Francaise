@@ -261,6 +261,19 @@
     XCTAssertEqualObjects(candidates.firstObject, @"allons");
 }
 
+- (void)testSingleLetterInputIgnoresContextConjugations {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller recordCommittedWord:@"je"];
+    [controller setOriginalBuffer:@"p"];
+
+    NSArray *candidates = [controller candidates:nil];
+
+    // "parle" (a "je"-conjugated form of parler) would win if context-based conjugation
+    // ranking kicked in on a single letter; "pas" is the actual most frequent French word
+    // starting with "p" and should lead once the prefix is this short.
+    XCTAssertEqualObjects(candidates.firstObject, @"pas");
+}
+
 - (void)testNormalization {
     XCTAssertEqualObjects([self.engine normalizeFrenchText:@"ÉCOLE"], @"ecole");
     XCTAssertEqualObjects([self.engine normalizeFrenchText:@"J’AIME"], @"j'aime");

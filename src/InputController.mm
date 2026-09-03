@@ -377,8 +377,11 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
 
     NSArray *candidateList = [engine getFrenchCandidates:originalInput];
 
+    // A single typed letter matches far too many conjugated forms to usefully narrow
+    // anything down (e.g. "p" after "je" would jump straight to "parle"), so frequency-
+    // ranked dictionary words stay in charge until there's at least a two-letter prefix.
     NSString *ctx = [self recentContext];
-    if (ctx && originalInput.length > 0) {
+    if (ctx && originalInput.length > 1) {
         NSArray *conjugations = [engine getFrenchConjugations:originalInput context:ctx maxResults:8];
         NSArray *predictions = [engine predictFrenchWordsForContext:ctx prefixFilter:originalInput maxResults:5];
         if (conjugations.count > 0 || predictions.count > 0) {
