@@ -230,6 +230,45 @@ extern NSUserDefaults *preference;
     XCTAssertTrue([masculineForms containsObject:@"suis allé"]);
 }
 
+- (void)testDirectObjectAgreementForElidedSingularPronoun {
+    // "je l'ai" - "l'" is le/la elided before the vowel-initial auxiliary, so the antecedent's
+    // gender can't be recovered from the text; both are offered instead of guessing. As with
+    // the auxiliary-already-typed path, the user types towards the lemma ("voir"), not the
+    // target form itself.
+    NSArray *forms = [self.engine getFrenchConjugations:@"voi" context:@"je l’ai" maxResults:8];
+    XCTAssertEqualObjects(forms.firstObject, @"vu");
+    XCTAssertEqualObjects(forms[1], @"vue");
+}
+
+- (void)testDirectObjectAgreementForPluralPronoun {
+    // "les" reveals plural but not gender, so both plural forms are offered.
+    NSArray *forms = [self.engine getFrenchConjugations:@"voi" context:@"je les ai" maxResults:8];
+    XCTAssertEqualObjects(forms.firstObject, @"vus");
+    XCTAssertEqualObjects(forms[1], @"vues");
+}
+
+- (void)testDirectObjectAgreementDoesNotApplyToIndirectObjectOrPlainAuxiliary {
+    // "lui" is an indirect object ("parler à quelqu'un") - never triggers participle
+    // agreement, so the auxiliary-already-typed path should still just offer the bare
+    // participle, with no agreed variants beside it.
+    NSArray *indirectObjectForms = [self.engine getFrenchConjugations:@"parle" context:@"je lui ai" maxResults:8];
+    XCTAssertEqualObjects(indirectObjectForms.firstObject, @"parlé");
+    XCTAssertFalse([indirectObjectForms containsObject:@"parlée"]);
+    XCTAssertFalse([indirectObjectForms containsObject:@"parlés"]);
+
+    // No direct object at all - same as before this feature existed.
+    NSArray *plainForms = [self.engine getFrenchConjugations:@"mange" context:@"il a" maxResults:8];
+    XCTAssertEqualObjects(plainForms.firstObject, @"mangé");
+    XCTAssertFalse([plainForms containsObject:@"mangée"]);
+}
+
+- (void)testDirectObjectAgreementDoesNotApplyToEtreCompoundTenses {
+    // être-based compound tenses agree with the subject (see testFeminineAgreementApplies...),
+    // never with a preceding direct object, so this path must stay a no-op for them.
+    NSArray *forms = [self.engine getFrenchConjugations:@"all" context:@"je suis" maxResults:8];
+    XCTAssertEqualObjects(forms.firstObject, @"allé");
+}
+
 - (void)testDirectObjectContextRanksAvoirFirst {
     NSDictionary *dualAuxiliaryForms = @{
         @"descendre" : @[ @"ai descendu", @"suis descendu" ],

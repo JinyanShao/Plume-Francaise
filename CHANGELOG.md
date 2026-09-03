@@ -11,6 +11,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
   féminin (`allée`, par exemple) si l'utilisateur l'a demandé — les temps simples et les
   temps composés avec avoir ne sont, eux, jamais concernés par l'accord
+- Accord du participe passé avec un complément d'objet direct placé avant un temps composé
+  avec avoir (« je l'ai vue », « je les ai vus ») ; comme l'élision de « le »/« la » en
+  « l' » ne permet plus de deviner le genre de l'antécédent, les deux formes possibles sont
+  proposées plutôt que d'en imposer une, de même pour le nombre avec « les » — un objet
+  indirect comme « lui »/« leur » ne déclenche jamais cet accord
 
 ### Corrections
 

@@ -195,6 +195,31 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
     return [form stringByAppendingString:@"e"];
 }
 
+// Looks up the bare past participle (with the auxiliary word stripped off) for a lemma in
+// the passé composé cell for the given subject, e.g. auxiliaryWord "ai" against the stored
+// phrase "ai vu" returns "vu". Shared by the two lookups below, which differ only in what
+// they do with the auxiliary word and the resulting participle.
+- (NSString *)baseParticipleForLemmaPattern:(NSString *)pattern subject:(NSString *)subject auxiliaryWord:(NSString *)auxiliaryWord {
+    if (auxiliaryWord.length == 0)
+        return nil;
+    __block NSString *participle = nil;
+    NSString *auxiliaryPrefix = [auxiliaryWord stringByAppendingString:@" "];
+    [_frenchDbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet *result = [db executeQuery:@"SELECT form, form_normalized FROM french_conjugations "
+                                               @"WHERE lemma_normalized LIKE ? AND subject = ? AND tense = 'past_compound' "
+                                               @"ORDER BY verb_frequency DESC LIMIT 20",
+                                               pattern, subject];
+        while ([result next]) {
+            if ([[result stringForColumn:@"form_normalized"] hasPrefix:auxiliaryPrefix]) {
+                participle = [[result stringForColumn:@"form"] substringFromIndex:auxiliaryPrefix.length];
+                break;
+            }
+        }
+        [result close];
+    }];
+    return participle;
+}
+
 // If the user already typed the auxiliary itself (e.g. "je" then "suis", committed
 // separately, then starts typing the verb), the context's last word IS that auxiliary -
 // not just a hint that one might be needed. In that case the useful suggestion is the bare
@@ -210,23 +235,45 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
     BOOL usesEtre = [EtrePresentWordForSubject(subject) isEqualToString:lastPart];
     if (!usesEtre && ![AvoirPresentWordForSubject(subject) isEqualToString:lastPart])
         return nil;
-
-    __block NSString *participle = nil;
-    NSString *auxiliaryPrefix = [lastPart stringByAppendingString:@" "];
-    [_frenchDbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet *result = [db executeQuery:@"SELECT form, form_normalized FROM french_conjugations "
-                                               @"WHERE lemma_normalized LIKE ? AND subject = ? AND tense = 'past_compound' "
-                                               @"ORDER BY verb_frequency DESC LIMIT 20",
-                                               pattern, subject];
-        while ([result next]) {
-            if ([[result stringForColumn:@"form_normalized"] hasPrefix:auxiliaryPrefix]) {
-                participle = [[result stringForColumn:@"form"] substringFromIndex:auxiliaryPrefix.length];
-                break;
-            }
-        }
-        [result close];
-    }];
+    NSString *participle = [self baseParticipleForLemmaPattern:pattern subject:subject auxiliaryWord:lastPart];
     return [self applyGenderAgreementIfNeeded:participle subject:subject usesEtre:usesEtre];
+}
+
+// Past participles in avoir-based compound tenses agree with a preceding DIRECT object
+// instead of the subject - most commonly the pronoun "le/la/les" placed before the
+// auxiliary ("je l'ai vue", "je les ai vus"), unlike an indirect object such as "lui"/"leur"
+// which never triggers agreement. "le" and "la" both elide to "l'" before a vowel (which
+// "ai/as/a/avons/avez/ont" always are), so once elided the pronoun no longer reveals
+// whether its antecedent was masculine or feminine; both forms are offered as separate
+// candidates rather than guessing which one the user meant. "les" reveals plural but not
+// gender either, so both plural forms are offered for the same reason.
+- (NSArray *)participlesForDirectObjectAgreementInContext:(NSString *)context subject:(NSString *)subject lemmaPattern:(NSString *)pattern {
+    if (subject.length == 0)
+        return @[];
+    NSString *avoirWord = AvoirPresentWordForSubject(subject);
+    if (avoirWord.length == 0)
+        return @[];
+    NSArray *parts = [[self normalizeFrenchText:context ?: @""] componentsSeparatedByString:@" "];
+    NSString *lastPart = parts.lastObject;
+    if (lastPart.length == 0)
+        return @[];
+
+    BOOL isPlural;
+    if ([lastPart isEqualToString:[NSString stringWithFormat:@"l'%@", avoirWord]]) {
+        isPlural = NO;
+    } else if ([lastPart isEqualToString:avoirWord] && parts.count >= 2 && [parts[parts.count - 2] isEqualToString:@"les"]) {
+        isPlural = YES;
+    } else {
+        return @[];
+    }
+
+    NSString *baseParticiple = [self baseParticipleForLemmaPattern:pattern subject:subject auxiliaryWord:avoirWord];
+    if (baseParticiple.length == 0)
+        return @[];
+
+    NSString *masculineForm = isPlural ? [baseParticiple stringByAppendingString:@"s"] : baseParticiple;
+    NSString *feminineForm = [baseParticiple stringByAppendingString:isPlural ? @"es" : @"e"];
+    return @[ masculineForm, feminineForm ];
 }
 
 - (NSArray *)getFrenchConjugations:(NSString *)input context:(NSString *)context maxResults:(NSInteger)max {
@@ -238,9 +285,15 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
     BOOL preferAvoir = [self contextPrefersAvoir:context];
     __block NSMutableOrderedSet *forms = [NSMutableOrderedSet orderedSet];
 
-    NSString *participleAfterAuxiliary = [self participleForAuxiliaryAlreadyTypedInContext:context subject:subject lemmaPattern:pattern];
-    if (participleAfterAuxiliary.length > 0)
-        [forms addObject:[self candidate:participleAfterAuxiliary matchingCaseOfInput:input]];
+    NSArray *directObjectParticiples = [self participlesForDirectObjectAgreementInContext:context subject:subject lemmaPattern:pattern];
+    if (directObjectParticiples.count > 0) {
+        for (NSString *candidate in directObjectParticiples)
+            [forms addObject:[self candidate:candidate matchingCaseOfInput:input]];
+    } else {
+        NSString *participleAfterAuxiliary = [self participleForAuxiliaryAlreadyTypedInContext:context subject:subject lemmaPattern:pattern];
+        if (participleAfterAuxiliary.length > 0)
+            [forms addObject:[self candidate:participleAfterAuxiliary matchingCaseOfInput:input]];
+    }
 
     [_frenchDbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet *result = [db executeQuery:@"SELECT form FROM french_conjugations "
