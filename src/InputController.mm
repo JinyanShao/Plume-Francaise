@@ -377,11 +377,15 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
 
     NSArray *candidateList = [engine getFrenchCandidates:originalInput];
 
-    // A single typed letter matches far too many conjugated forms to usefully narrow
-    // anything down (e.g. "p" after "je" would jump straight to "parle"), so frequency-
-    // ranked dictionary words stay in charge until there's at least a two-letter prefix.
+    // A one- or two-letter prefix matches far too many conjugated forms across too many
+    // different verbs to usefully narrow anything down: with only "mo" typed after "je",
+    // the highest-frequency verb overall ("mourir" -> "meurs") can outrank the verb the
+    // user was actually typing towards ("monter" -> "monte"), since frequency is the only
+    // thing left to break the tie once tense and subject already match. Frequency-ranked
+    // dictionary words stay in charge until there's at least a three-letter prefix, which
+    // is long enough to meaningfully narrow the field (see testContextConjugationStillLeadsForPrefix).
     NSString *ctx = [self recentContext];
-    if (ctx && originalInput.length > 1) {
+    if (ctx && originalInput.length > 2) {
         NSArray *conjugations = [engine getFrenchConjugations:originalInput context:ctx maxResults:8];
         NSArray *predictions = [engine predictFrenchWordsForContext:ctx prefixFilter:originalInput maxResults:5];
         if (conjugations.count > 0 || predictions.count > 0) {

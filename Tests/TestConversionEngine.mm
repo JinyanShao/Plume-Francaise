@@ -274,6 +274,22 @@
     XCTAssertEqualObjects(candidates.firstObject, @"pas");
 }
 
+- (void)testTwoLetterInputIgnoresContextConjugations {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller recordCommittedWord:@"je"];
+    [controller setOriginalBuffer:@"mo"];
+
+    NSArray *candidates = [controller candidates:nil];
+    NSArray *withoutContext = [self.engine getFrenchCandidates:@"mo"];
+
+    // "meurs" (mourir is simply the highest-frequency verb matching "mo") would win if
+    // context-based conjugation ranking kicked in this early, even though the user was
+    // visibly typing towards something else entirely. With the override correctly held
+    // off, the result should match plain frequency-ranked candidates exactly.
+    XCTAssertEqualObjects(candidates.firstObject, withoutContext.firstObject);
+    XCTAssertNotEqualObjects(candidates.firstObject, @"meurs");
+}
+
 - (void)testNormalization {
     XCTAssertEqualObjects([self.engine normalizeFrenchText:@"ÉCOLE"], @"ecole");
     XCTAssertEqualObjects([self.engine normalizeFrenchText:@"J’AIME"], @"j'aime");
