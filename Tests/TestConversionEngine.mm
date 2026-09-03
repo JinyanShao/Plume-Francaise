@@ -20,14 +20,19 @@
 @end
 
 @interface TestInputController : InputController
+@property(nonatomic, copy) NSString *lastPreeditString;
+@property(nonatomic) NSInteger preeditCallCount;
 - (NSInteger)insertionIndex;
 - (NSInteger)currentCandidateIndex;
 - (void)setCurrentCandidateIndex:(NSInteger)index;
+- (void)setHasNavigatedCandidates:(BOOL)navigated;
 @end
 
 @implementation TestInputController
 
 - (void)showPreeditString:(NSString *)input {
+    self.lastPreeditString = input;
+    self.preeditCallCount++;
 }
 
 - (NSInteger)insertionIndex {
@@ -40,6 +45,10 @@
 
 - (void)setCurrentCandidateIndex:(NSInteger)index {
     _currentCandidateIndex = index;
+}
+
+- (void)setHasNavigatedCandidates:(BOOL)navigated {
+    _hasNavigatedCandidates = navigated;
 }
 
 @end
@@ -348,6 +357,27 @@
     [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:@"é"]];
 
     XCTAssertEqual([controller insertionIndex], [controller originalBuffer].length);
+}
+
+- (void)testAutoHighlightedCandidateDoesNotOverwritePreeditText {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"cont"];
+    NSArray *candidates = [controller candidates:nil];
+    XCTAssertGreaterThan(candidates.count, 0);
+
+    // IMKCandidates fires candidateSelectionChanged: the instant a fresh list appears,
+    // auto-highlighting the first entry - not because the user did anything. Previewing
+    // that inline would silently rewrite "cont" into e.g. "continue" before it was asked
+    // for, so this must not touch the marked text yet.
+    [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:candidates.firstObject]];
+    XCTAssertEqual(controller.preeditCallCount, 0);
+
+    // Once the user has actually navigated the candidate list, previewing the highlighted
+    // candidate inline is the expected, tested behavior (see
+    // testCandidatePreviewKeepsOriginalInsertionIndex).
+    [controller setHasNavigatedCandidates:YES];
+    [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:candidates.firstObject]];
+    XCTAssertEqualObjects(controller.lastPreeditString, candidates.firstObject);
 }
 
 - (void)testSpacedPunctuationGetsNarrowNoBreakSpaceBefore {

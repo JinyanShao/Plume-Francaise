@@ -13,6 +13,7 @@
     NSUInteger _lastModifiers;
     NSEventType _lastEventType;
     NSMutableArray<NSString *> *_recentWords;
+    BOOL _hasNavigatedCandidates;
 }
 
 - (NSMutableString *)composedBuffer;

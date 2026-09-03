@@ -12,6 +12,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   du dictionnaire classés par fréquence (`mon`…) restent prioritaires tant
   que le préfixe ne fait pas au moins trois lettres, comme pour `all` →
   `allons`
+- Le candidat automatiquement mis en surbrillance à l'apparition de la liste
+  ne remplace plus le texte souligné en cours de composition (par exemple
+  `cont` affiché comme `continue`) tant que l'utilisateur n'a pas
+  explicitement navigué avec les flèches ; le texte affiché correspond
+  désormais à ce qui a été réellement tapé jusqu'à une sélection explicite
 
 ## 1.1.0 — 3 septembre 2026
 
