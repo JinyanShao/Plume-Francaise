@@ -34,6 +34,24 @@ static BOOL RequestHasTrustedOrigin(GCDWebServerRequest *request) {
     return [origin caseInsensitiveCompare:expectedOrigin] == NSOrderedSame;
 }
 
+// Compares two "vX.Y.Z"-ish version strings component by component. Returns YES if
+// `latest` is strictly newer than `current`. Missing or non-numeric components are
+// treated as 0, so this degrades gracefully instead of throwing on unexpected input.
+static BOOL VersionIsNewer(NSString *latest, NSString *current) {
+    NSCharacterSet *nonDigits = [NSCharacterSet characterSetWithCharactersInString:@"0123456789."];
+    NSString *cleanLatest = [[latest componentsSeparatedByCharactersInSet:nonDigits.invertedSet] componentsJoinedByString:@""];
+    NSArray<NSString *> *latestParts = [cleanLatest componentsSeparatedByString:@"."];
+    NSArray<NSString *> *currentParts = [current componentsSeparatedByString:@"."];
+    NSUInteger count = MAX(latestParts.count, currentParts.count);
+    for (NSUInteger i = 0; i < count; i++) {
+        NSInteger latestValue = i < latestParts.count ? latestParts[i].integerValue : 0;
+        NSInteger currentValue = i < currentParts.count ? currentParts[i].integerValue : 0;
+        if (latestValue != currentValue)
+            return latestValue > currentValue;
+    }
+    return NO;
+}
+
 + (instancetype)sharedServer {
     static WebServer *server = nil;
     static dispatch_once_t token;
@@ -119,6 +137,56 @@ static BOOL RequestHasTrustedOrigin(GCDWebServerRequest *request) {
                           }
                           return [GCDWebServerDataResponse responseWithJSONObject:[engine allSubstitutions]];
                       }];
+
+    // The only network request this app ever makes, and only when the user clicks
+    // "Check for updates" in the preferences page. Nothing is sent besides the plain
+    // HTTPS request GitHub's public releases API requires; no identifying data is included.
+    // POST (not GET) so browsers attach an Origin header we can check: fetch() only sends
+    // Origin on non-GET/HEAD requests, even for same-origin calls.
+    [webServer addHandlerForMethod:@"POST"
+                                path:@"/update-check"
+                        requestClass:[GCDWebServerRequest class]
+                   asyncProcessBlock:^(GCDWebServerRequest *request, GCDWebServerCompletionBlock completionBlock) {
+                       if (!RequestHasTrustedOrigin(request)) {
+                           completionBlock([GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden
+                                                                                       message:@"Untrusted origin"]);
+                           return;
+                       }
+                       NSString *currentVersion = [NSBundle mainBundle].infoDictionary[@"CFBundleShortVersionString"] ?: @"0";
+                       NSURL *url = [NSURL URLWithString:@"https://api.github.com/repos/JinyanShao/Plume-Francaise/releases/latest"];
+                       NSMutableURLRequest *githubRequest = [NSMutableURLRequest requestWithURL:url];
+                       [githubRequest setValue:@"application/vnd.github+json" forHTTPHeaderField:@"Accept"];
+                       NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+                       configuration.timeoutIntervalForRequest = 8;
+                       NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
+                       NSURLSessionDataTask *task = [session
+                           dataTaskWithRequest:githubRequest
+                             completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                                 if (error || data.length == 0) {
+                                     completionBlock([GCDWebServerErrorResponse
+                                         responseWithServerError:kGCDWebServerHTTPStatusCode_ServiceUnavailable
+                                                          message:@"Could not reach GitHub: %@", error.localizedDescription ?: @"empty response"]);
+                                     return;
+                                 }
+                                 NSDictionary *release = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                                 NSString *tagName = release[@"tag_name"];
+                                 if (![tagName isKindOfClass:NSString.class]) {
+                                     completionBlock([GCDWebServerErrorResponse
+                                         responseWithServerError:kGCDWebServerHTTPStatusCode_ServiceUnavailable
+                                                          message:@"Unexpected response from GitHub"]);
+                                     return;
+                                 }
+                                 NSString *latestVersion = [tagName hasPrefix:@"v"] ? [tagName substringFromIndex:1] : tagName;
+                                 NSString *releaseUrl = release[@"html_url"];
+                                 completionBlock([GCDWebServerDataResponse responseWithJSONObject:@{
+                                     @"currentVersion" : currentVersion,
+                                     @"latestVersion" : latestVersion,
+                                     @"updateAvailable" : @(VersionIsNewer(latestVersion, currentVersion)),
+                                     @"releaseUrl" : releaseUrl ?: @"https://github.com/JinyanShao/Plume-Francaise/releases",
+                                 }]);
+                             }];
+                       [task resume];
+                   }];
 
     NSMutableDictionary *options = [NSMutableDictionary dictionary];
     options[GCDWebServerOption_Port] = @(port);

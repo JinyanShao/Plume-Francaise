@@ -56,9 +56,14 @@ Sélectionnez l’icône de saisie dans la barre des menus, puis choisissez
 
 ## Mise à jour
 
-Quittez les applications dans lesquelles la méthode de saisie est active,
-remplacez l’ancienne application dans `~/Library/Input Methods`, puis
-reconnectez-vous à votre compte macOS.
+La page de préférences (accessible depuis le menu de la méthode de saisie)
+propose un bouton « Check for updates » qui indique si une nouvelle version est
+disponible sur GitHub. C’est la seule requête réseau que l’application effectue,
+et uniquement lorsque vous cliquez sur ce bouton.
+
+Pour installer une nouvelle version : quittez les applications dans lesquelles
+la méthode de saisie est active, remplacez l’ancienne application dans
+`~/Library/Input Methods`, puis reconnectez-vous à votre compte macOS.
 
 ## Désinstallation
 

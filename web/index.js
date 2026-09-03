@@ -5,6 +5,8 @@ const substitutionValue = document.querySelector("#substitutionValue");
 const substitutionsBody = document.querySelector("#substitutions");
 const emptyState = document.querySelector("#emptyState");
 const statusText = document.querySelector("#status");
+const checkUpdateButton = document.querySelector("#checkUpdateButton");
+const updateStatus = document.querySelector("#updateStatus");
 
 function setStatus(message) {
   statusText.textContent = message;
@@ -98,6 +100,31 @@ substitutionForm.addEventListener("submit", async (event) => {
 });
 
 commitWordWithSpace.addEventListener("change", savePreference);
+
+checkUpdateButton.addEventListener("click", async () => {
+  checkUpdateButton.disabled = true;
+  updateStatus.textContent = "Checking…";
+  try {
+    const result = await requestJSON("/update-check", { method: "POST" });
+    if (result.updateAvailable) {
+      updateStatus.replaceChildren(
+        document.createTextNode(`Version ${result.latestVersion} is available (you have ${result.currentVersion}). `)
+      );
+      const link = document.createElement("a");
+      link.href = result.releaseUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = "Open the release page";
+      updateStatus.append(link);
+    } else {
+      updateStatus.textContent = `You're up to date (${result.currentVersion}).`;
+    }
+  } catch (error) {
+    updateStatus.textContent = `Couldn't check for updates: ${error.message}`;
+  } finally {
+    checkUpdateButton.disabled = false;
+  }
+});
 
 Promise.all([loadPreference(), loadSubstitutions()]).catch((error) => {
   setStatus(error.message);

@@ -78,6 +78,8 @@ Personal substitutions are stored locally in:
 
 Recent words used for contextual ranking are kept in the running input-method process. There is no account, cloud synchronization, analytics service, or remote language model involved in text conversion.
 
+The preferences page has a "Check for updates" button. It is the only network request Plume Française ever makes, only runs when clicked, and only asks GitHub for the latest release number — no typed text, substitutions, or identifying information is sent.
+
 See [PRIVACY.md](PRIVACY.md) for the project's privacy statement.
 
 ## How It Works

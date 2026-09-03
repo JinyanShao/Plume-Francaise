@@ -27,6 +27,12 @@ utilisateur.
 La page de préférences est servie uniquement sur l’adresse locale de la machine
 et n’est pas accessible depuis Internet.
 
+La seule requête réseau que l’application puisse effectuer est déclenchée
+manuellement par le bouton « Check for updates » de la page de préférences.
+Elle interroge l’API publique des releases GitHub du projet pour connaître le
+numéro de la dernière version ; aucune donnée saisie, aucun identifiant et
+aucune information sur cette machine ne sont envoyés.
+
 ## Conservation et suppression
 
 Le contexte récent est conservé uniquement pendant l’utilisation de la méthode
