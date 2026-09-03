@@ -2,6 +2,15 @@
 
 Toutes les modifications importantes sont documentées dans ce fichier.
 
+## Non publié
+
+### Corrections
+
+- Une seule lettre tapée après un contexte reconnu (par exemple `p` après
+  `je`) ne bascule plus directement sur les formes conjuguées correspondantes
+  (`parle`) ; les mots du dictionnaire classés par fréquence (`pas`, `pour`…)
+  restent prioritaires tant que le préfixe ne fait pas au moins deux lettres
+
 ## 1.1.0 — 3 septembre 2026
 
 ### Ajouts
