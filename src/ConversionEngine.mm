@@ -1,5 +1,31 @@
 #import "ConversionEngine.h"
 
+extern NSUserDefaults *preference;
+
+static NSString *EtrePresentWordForSubject(NSString *subject) {
+    static NSDictionary *forms;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forms = @{
+            @"je" : @"suis", @"tu" : @"es", @"il" : @"est", @"elle" : @"est", @"on" : @"est",
+            @"nous" : @"sommes", @"vous" : @"etes", @"ils" : @"sont", @"elles" : @"sont"
+        };
+    });
+    return forms[subject];
+}
+
+static NSString *AvoirPresentWordForSubject(NSString *subject) {
+    static NSDictionary *forms;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forms = @{
+            @"je" : @"ai", @"tu" : @"as", @"il" : @"a", @"elle" : @"a", @"on" : @"a",
+            @"nous" : @"avons", @"vous" : @"avez", @"ils" : @"ont", @"elles" : @"ont"
+        };
+    });
+    return forms[subject];
+}
+
 @implementation ConversionEngine {
     FMDatabaseQueue *_frenchDbQueue;
     FMDatabaseQueue *_subDbQueue;
@@ -148,6 +174,27 @@
     return [directObjects containsObject:lastPart];
 }
 
+// Past participles agree in gender with the subject only for être-based compound tenses
+// (présent, imparfait and futur simple never vary by gender at all). The dictionary already
+// stores the correct form for il/elle/nous/vous/ils/elles, since those subjects have a fixed
+// grammatical gender regardless of who is speaking - only je/tu/on depend on a preference the
+// user sets, and the dictionary always stores their masculine form. When the user has said
+// they're feminine, the regular "+e" rule applies to whatever the last word of the phrase is
+// (the participle itself, whether or not the auxiliary is included alongside it), so this
+// works uniformly for the full dictionary phrase ("suis allé" -> "suis allée") and for the
+// bare participle used once the auxiliary has already been typed separately ("allé" ->
+// "allée").
+- (NSString *)applyGenderAgreementIfNeeded:(NSString *)form subject:(NSString *)subject usesEtre:(BOOL)usesEtre {
+    if (!usesEtre || form.length == 0)
+        return form;
+    NSSet *subjectsNeedingPreference = [NSSet setWithArray:@[ @"je", @"tu", @"on" ]];
+    if (![subjectsNeedingPreference containsObject:subject])
+        return form;
+    if (![[preference stringForKey:@"genderAgreement"] isEqualToString:@"feminine"])
+        return form;
+    return [form stringByAppendingString:@"e"];
+}
+
 // If the user already typed the auxiliary itself (e.g. "je" then "suis", committed
 // separately, then starts typing the verb), the context's last word IS that auxiliary -
 // not just a hint that one might be needed. In that case the useful suggestion is the bare
@@ -160,15 +207,8 @@
     NSString *lastPart = [[self normalizeFrenchText:context ?: @""] componentsSeparatedByString:@" "].lastObject;
     if (lastPart.length == 0)
         return nil;
-    NSDictionary *etrePresent = @{
-        @"je" : @"suis", @"tu" : @"es", @"il" : @"est", @"elle" : @"est", @"on" : @"est",
-        @"nous" : @"sommes", @"vous" : @"etes", @"ils" : @"sont", @"elles" : @"sont"
-    };
-    NSDictionary *avoirPresent = @{
-        @"je" : @"ai", @"tu" : @"as", @"il" : @"a", @"elle" : @"a", @"on" : @"a",
-        @"nous" : @"avons", @"vous" : @"avez", @"ils" : @"ont", @"elles" : @"ont"
-    };
-    if (![etrePresent[subject] isEqualToString:lastPart] && ![avoirPresent[subject] isEqualToString:lastPart])
+    BOOL usesEtre = [EtrePresentWordForSubject(subject) isEqualToString:lastPart];
+    if (!usesEtre && ![AvoirPresentWordForSubject(subject) isEqualToString:lastPart])
         return nil;
 
     __block NSString *participle = nil;
@@ -186,7 +226,7 @@
         }
         [result close];
     }];
-    return participle;
+    return [self applyGenderAgreementIfNeeded:participle subject:subject usesEtre:usesEtre];
 }
 
 - (NSArray *)getFrenchConjugations:(NSString *)input context:(NSString *)context maxResults:(NSInteger)max {
@@ -212,8 +252,13 @@
                                                @"verb_frequency DESC LIMIT ?",
                                                pattern, pattern, subject, normalized, @(preferAvoir), @(preferAvoir),
                                                @(MAX(max * 4, 40))];
+        NSString *etreWord = EtrePresentWordForSubject(subject);
+        NSString *etrePrefix = etreWord ? [etreWord stringByAppendingString:@" "] : nil;
         while ([result next]) {
-            NSString *form = [self candidate:[result stringForColumn:@"form"] matchingCaseOfInput:input];
+            NSString *rawForm = [result stringForColumn:@"form"];
+            BOOL usesEtre = etrePrefix && [[self normalizeFrenchText:rawForm] hasPrefix:etrePrefix];
+            NSString *agreedForm = [self applyGenderAgreementIfNeeded:rawForm subject:subject usesEtre:usesEtre];
+            NSString *form = [self candidate:agreedForm matchingCaseOfInput:input];
             if (form.length > 0)
                 [forms addObject:form];
             if (forms.count >= (NSUInteger)max)

@@ -56,7 +56,7 @@ void deactivateInputSource() {
 
 void initPreference() {
     preference = [NSUserDefaults standardUserDefaults];
-    NSDictionary *defaultPrefs = @{@"commitWordWithSpace" : @YES};
+    NSDictionary *defaultPrefs = @{@"commitWordWithSpace" : @YES, @"genderAgreement" : @"unspecified"};
     [preference registerDefaults:defaultPrefs];
 }
 

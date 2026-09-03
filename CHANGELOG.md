@@ -4,6 +4,14 @@ Toutes les modifications importantes sont documentées dans ce fichier.
 
 ## Non publié
 
+### Ajouts
+
+- Préférence « Grammar » dans la page de préférences pour indiquer son propre genre
+  (masculin, féminin ou non précisé) ; quand « je », « tu » ou « on » est le sujet d'un
+  temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
+  féminin (`allée`, par exemple) si l'utilisateur l'a demandé — les temps simples et les
+  temps composés avec avoir ne sont, eux, jamais concernés par l'accord
+
 ### Corrections
 
 - Un préfixe d'une ou deux lettres tapé après un contexte reconnu (par

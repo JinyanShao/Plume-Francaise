@@ -1,4 +1,5 @@
 const commitWordWithSpace = document.querySelector("#commitWordWithSpace");
+const genderAgreement = document.querySelector("#genderAgreement");
 const substitutionForm = document.querySelector("#substitutionForm");
 const substitutionKey = document.querySelector("#substitutionKey");
 const substitutionValue = document.querySelector("#substitutionValue");
@@ -66,6 +67,7 @@ function renderSubstitutions(substitutions) {
 async function loadPreference() {
   const preference = await requestJSON("/preference");
   commitWordWithSpace.checked = Boolean(preference.commitWordWithSpace);
+  genderAgreement.value = preference.genderAgreement || "unspecified";
 }
 
 async function savePreference() {
@@ -73,6 +75,7 @@ async function savePreference() {
     method: "POST",
     body: JSON.stringify({
       commitWordWithSpace: commitWordWithSpace.checked,
+      genderAgreement: genderAgreement.value,
     }),
   });
   setStatus("Preference saved.");
@@ -100,6 +103,7 @@ substitutionForm.addEventListener("submit", async (event) => {
 });
 
 commitWordWithSpace.addEventListener("change", savePreference);
+genderAgreement.addEventListener("change", savePreference);
 
 checkUpdateButton.addEventListener("click", async () => {
   checkUpdateButton.disabled = true;

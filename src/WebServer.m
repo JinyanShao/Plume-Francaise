@@ -9,6 +9,7 @@ extern NSUserDefaults *preference;
 extern ConversionEngine *engine;
 
 NSString *COMMIT_WORD_WITH_SPACE_KEY = @"commitWordWithSpace";
+NSString *GENDER_AGREEMENT_KEY = @"genderAgreement";
 
 @interface WebServer ()
 
@@ -78,7 +79,8 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                       requestClass:[GCDWebServerRequest class]
                       processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
                           return [GCDWebServerDataResponse responseWithJSONObject:@{
-                              COMMIT_WORD_WITH_SPACE_KEY : @([preference boolForKey:COMMIT_WORD_WITH_SPACE_KEY])
+                              COMMIT_WORD_WITH_SPACE_KEY : @([preference boolForKey:COMMIT_WORD_WITH_SPACE_KEY]),
+                              GENDER_AGREEMENT_KEY : [preference stringForKey:GENDER_AGREEMENT_KEY] ?: @"unspecified"
                           }];
                       }];
 
@@ -95,7 +97,15 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                           bool commitWordWithSpace = [data[COMMIT_WORD_WITH_SPACE_KEY] boolValue];
                           [preference setBool:commitWordWithSpace forKey:COMMIT_WORD_WITH_SPACE_KEY];
 
-                          return [GCDWebServerDataResponse responseWithJSONObject:data];
+                          NSSet *validGenders = [NSSet setWithArray:@[ @"unspecified", @"masculine", @"feminine" ]];
+                          NSString *genderAgreement = data[GENDER_AGREEMENT_KEY];
+                          if ([validGenders containsObject:genderAgreement])
+                              [preference setObject:genderAgreement forKey:GENDER_AGREEMENT_KEY];
+
+                          return [GCDWebServerDataResponse responseWithJSONObject:@{
+                              COMMIT_WORD_WITH_SPACE_KEY : @([preference boolForKey:COMMIT_WORD_WITH_SPACE_KEY]),
+                              GENDER_AGREEMENT_KEY : [preference stringForKey:GENDER_AGREEMENT_KEY] ?: @"unspecified"
+                          }];
                       }];
 
     [webServer addHandlerForMethod:@"GET"
