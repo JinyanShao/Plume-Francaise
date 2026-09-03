@@ -179,6 +179,39 @@ tr:last-child td {
   margin: 14px 0 0;
 }
 
+.usage-list {
+  margin: 16px 0 0;
+  padding: 16px 16px 16px 36px;
+  background: #fff;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  color: #344054;
+  line-height: 1.6;
+}
+
+.usage-list code {
+  padding: 1px 5px;
+  background: #f1f4f8;
+  border-radius: 4px;
+  font-size: 0.95em;
+}
+
+.update-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.update-row span {
+  color: #475467;
+  font-size: 13px;
+}
+
+.update-row a {
+  color: #315fbd;
+}
+
 #status {
   min-height: 20px;
   color: #315fbd;
