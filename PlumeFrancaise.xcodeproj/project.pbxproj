@@ -13,6 +13,7 @@
 		0DE74C001978F18E00040F3C /* PlumeFrancaise.icns in Resources */ = {isa = PBXBuildFile; fileRef = 0DE74BFF1978F18E00040F3C /* PlumeFrancaise.icns */; };
 		381CD8C622C60D610098764F /* WebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 381CD8C522C60D610098764F /* WebServer.m */; };
 		3833665922DD6F45004BA2D1 /* TestConversionEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3833665822DD6F45004BA2D1 /* TestConversionEngine.mm */; };
+		238BBD07DC1241EF872D2142 /* TestWebServer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 96BA947927C644DFBA31C431 /* TestWebServer.mm */; };
 		386E1C0022DC5E9C000C6DCF /* ConversionEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = 386E1BFF22DC5E9B000C6DCF /* ConversionEngine.mm */; };
 		389468CB1F56A34A00EF1F5E /* web in Resources */ = {isa = PBXBuildFile; fileRef = 389468CA1F56A34A00EF1F5E /* web */; };
 		389468D61F57C8CE00EF1F5E /* InputApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 389468D51F57C8CE00EF1F5E /* InputApplicationDelegate.m */; };
@@ -51,6 +52,7 @@
 		381CD8C422C60D610098764F /* WebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebServer.h; path = src/WebServer.h; sourceTree = "<group>"; };
 		381CD8C522C60D610098764F /* WebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WebServer.m; path = src/WebServer.m; sourceTree = "<group>"; };
 		3833665822DD6F45004BA2D1 /* TestConversionEngine.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TestConversionEngine.mm; sourceTree = "<group>"; };
+		96BA947927C644DFBA31C431 /* TestWebServer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TestWebServer.mm; sourceTree = "<group>"; };
 		386E1BFC22DC5A54000C6DCF /* ConversionEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConversionEngine.h; path = src/ConversionEngine.h; sourceTree = "<group>"; };
 		386E1BFF22DC5E9B000C6DCF /* ConversionEngine.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ConversionEngine.mm; path = src/ConversionEngine.mm; sourceTree = "<group>"; };
 		389468CA1F56A34A00EF1F5E /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				3833665822DD6F45004BA2D1 /* TestConversionEngine.mm */,
+				96BA947927C644DFBA31C431 /* TestWebServer.mm */,
 				3802CD7D22CE034100A7E2F9 /* Info.plist */,
 			);
 			path = Tests;
@@ -398,6 +401,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3833665922DD6F45004BA2D1 /* TestConversionEngine.mm in Sources */,
+				238BBD07DC1241EF872D2142 /* TestWebServer.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
