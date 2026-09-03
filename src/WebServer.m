@@ -3,6 +3,7 @@
 #import "GCDWebServer.h"
 #import "GCDWebServerDataRequest.h"
 #import "GCDWebServerDataResponse.h"
+#import "GCDWebServerErrorResponse.h"
 
 extern NSUserDefaults *preference;
 extern ConversionEngine *engine;
@@ -18,6 +19,20 @@ NSString *COMMIT_WORD_WITH_SPACE_KEY = @"commitWordWithSpace";
 @implementation WebServer
 
 static int port = 62718;
+
+// The preferences page is only ever served from this same loopback origin. Any request
+// that changes state must present a matching Origin header, or it is rejected. Browsers
+// attach Origin to every same-origin fetch that isn't a plain GET/HEAD, as well as to
+// cross-site requests (including plain HTML form submissions), so this reliably tells
+// apart our own page from a malicious site trying to drive the preferences server via
+// the user's browser (CSRF / DNS-rebinding style attacks against localhost services).
+static BOOL RequestHasTrustedOrigin(GCDWebServerRequest *request) {
+    NSString *origin = request.headers[@"Origin"];
+    if (origin.length == 0)
+        return NO;
+    NSString *expectedOrigin = [NSString stringWithFormat:@"http://localhost:%d", port];
+    return [origin caseInsensitiveCompare:expectedOrigin] == NSOrderedSame;
+}
 
 + (instancetype)sharedServer {
     static WebServer *server = nil;
@@ -53,6 +68,10 @@ static int port = 62718;
                               path:@"/preference"
                       requestClass:[GCDWebServerDataRequest class]
                       processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
+                          if (!RequestHasTrustedOrigin(request))
+                              return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden
+                                                                                message:@"Untrusted origin"];
+
                           NSDictionary *data = ((GCDWebServerDataRequest *)request).jsonObject;
 
                           bool commitWordWithSpace = [data[COMMIT_WORD_WITH_SPACE_KEY] boolValue];
@@ -72,6 +91,10 @@ static int port = 62718;
                               path:@"/substitutions"
                       requestClass:[GCDWebServerDataRequest class]
                       processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
+                          if (!RequestHasTrustedOrigin(request))
+                              return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden
+                                                                                message:@"Untrusted origin"];
+
                           NSDictionary *data = ((GCDWebServerDataRequest *)request).jsonObject;
                           NSString *key = data[@"key"];
                           NSString *value = data[@"value"];
@@ -85,6 +108,10 @@ static int port = 62718;
                          pathRegex:@"/substitutions/(.+)"
                       requestClass:[GCDWebServerRequest class]
                       processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
+                          if (!RequestHasTrustedOrigin(request))
+                              return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden
+                                                                                message:@"Untrusted origin"];
+
                           NSArray *captures = [request attributeForKey:GCDWebServerRequestAttribute_RegexCaptures];
                           NSString *key = captures.firstObject;
                           if (key.length > 0) {
