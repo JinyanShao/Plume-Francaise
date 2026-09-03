@@ -162,6 +162,21 @@
     XCTAssertFalse([venirForms containsObject:@"ai venu"]);
 }
 
+- (void)testAuxiliaryAlreadyTypedSuggestsBareParticiple {
+    // "je" then "suis" committed as two separate words (not "j'ai" typed as one elision) -
+    // the auxiliary is already sitting in the document, so the useful suggestion for "all"
+    // is just "allé", not the redundant "suis allé" the dictionary stores for this cell.
+    NSArray *etreForms = [self.engine getFrenchConjugations:@"all" context:@"je suis" maxResults:8];
+    XCTAssertEqualObjects(etreForms.firstObject, @"allé");
+
+    NSArray *avoirForms = [self.engine getFrenchConjugations:@"mange" context:@"il a" maxResults:8];
+    XCTAssertEqualObjects(avoirForms.firstObject, @"mangé");
+
+    // Without an auxiliary already typed, present tense still leads as before.
+    NSArray *plainForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:8];
+    XCTAssertEqualObjects(plainForms.firstObject, @"vais");
+}
+
 - (void)testDirectObjectContextRanksAvoirFirst {
     NSDictionary *dualAuxiliaryForms = @{
         @"descendre" : @[ @"ai descendu", @"suis descendu" ],
