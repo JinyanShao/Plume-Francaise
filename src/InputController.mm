@@ -122,13 +122,13 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         if (isCandidatesVisible) {
             if (keyCode == KEY_ARROW_DOWN) {
                 [sharedCandidates moveDown:self];
-                _currentCandidateIndex++;
+                _currentCandidateIndex = MIN(_currentCandidateIndex + 1, (NSInteger)_candidates.count);
                 return YES;
             }
 
             if (keyCode == KEY_ARROW_UP) {
                 [sharedCandidates moveUp:self];
-                _currentCandidateIndex--;
+                _currentCandidateIndex = MAX(_currentCandidateIndex - 1, 1);
                 return YES;
             }
         }
@@ -408,16 +408,22 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
             NSArray *result = [engine mergeFrenchCandidateGroups:rankedGroups
                                                           maxResults:50];
             _candidates = [NSMutableArray arrayWithArray:result];
+            _currentCandidateIndex = 1;
             return result;
         }
     }
 
     _candidates = [NSMutableArray arrayWithArray:candidateList];
+    _currentCandidateIndex = 1;
     return candidateList;
 }
 
 - (void)candidateSelectionChanged:(NSAttributedString *)candidateString {
     [self _updateComposedBuffer:candidateString];
+
+    NSUInteger selectedIndex = [_candidates indexOfObject:candidateString.string];
+    if (selectedIndex != NSNotFound)
+        _currentCandidateIndex = (NSInteger)selectedIndex + 1;
 
     [self showPreeditString:candidateString.string];
 
