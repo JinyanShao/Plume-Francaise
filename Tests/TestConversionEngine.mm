@@ -6,6 +6,17 @@
 - (BOOL)onKeyEvent:(NSEvent *)event client:(id)sender;
 - (NSArray *)candidates:(id)sender;
 - (void)candidateSelectionChanged:(NSAttributedString *)candidateString;
+- (void)commitFrenchPunctuation:(NSString *)punctuation client:(id)sender;
+@end
+
+@interface FakeInsertClient : NSObject
+@property(nonatomic, copy) NSString *insertedText;
+@end
+
+@implementation FakeInsertClient
+- (void)insertText:(id)aString replacementRange:(NSRange)replacementRange {
+    self.insertedText = [aString isKindOfClass:[NSAttributedString class]] ? [(NSAttributedString *)aString string] : aString;
+}
 @end
 
 @interface TestInputController : InputController
@@ -308,6 +319,50 @@
     [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:@"é"]];
 
     XCTAssertEqual([controller insertionIndex], [controller originalBuffer].length);
+}
+
+- (void)testSpacedPunctuationGetsNarrowNoBreakSpaceBefore {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"bonjour"];
+
+    [controller commitFrenchPunctuation:@"!" client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"bonjour ! ");
+}
+
+- (void)testCommaAndPeriodGetTrailingSpaceOnly {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"bonjour"];
+
+    [controller commitFrenchPunctuation:@"," client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"bonjour, ");
+}
+
+- (void)testOtherPunctuationIsAppendedWithNoSpacing {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"exemple"];
+
+    [controller commitFrenchPunctuation:@")" client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"exemple)");
+}
+
+- (void)testSentenceEndingPunctuationResetsContextButNotOthers {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller recordCommittedWord:@"bonjour"];
+
+    [controller setOriginalBuffer:@"monde"];
+    [controller commitFrenchPunctuation:@"," client:client];
+    XCTAssertEqualObjects([controller recentContext], @"bonjour monde");
+
+    [controller setOriginalBuffer:@"fin"];
+    [controller commitFrenchPunctuation:@"." client:client];
+    XCTAssertNil([controller recentContext]);
 }
 
 @end
