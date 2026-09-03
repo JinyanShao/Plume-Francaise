@@ -10,6 +10,8 @@
 
 @interface TestInputController : InputController
 - (NSInteger)insertionIndex;
+- (NSInteger)currentCandidateIndex;
+- (void)setCurrentCandidateIndex:(NSInteger)index;
 @end
 
 @implementation TestInputController
@@ -19,6 +21,14 @@
 
 - (NSInteger)insertionIndex {
     return _insertionIndex;
+}
+
+- (NSInteger)currentCandidateIndex {
+    return _currentCandidateIndex;
+}
+
+- (void)setCurrentCandidateIndex:(NSInteger)index {
+    _currentCandidateIndex = index;
 }
 
 @end
@@ -260,6 +270,35 @@
                                         keyCode:0];
 
     XCTAssertFalse([controller onKeyEvent:event client:nil]);
+}
+
+- (void)testCandidateIndexResetsWhenCandidateListRebuilds {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"ecole"];
+    [controller candidates:nil];
+
+    // Simulate having navigated away from the top of the list with the arrow keys.
+    [controller setCurrentCandidateIndex:5];
+
+    // Retyping (or backspacing) rebuilds the candidate list, which should reset the
+    // selection back to the top instead of leaving the stale index from before.
+    [controller setOriginalBuffer:@"ecole"];
+    [controller candidates:nil];
+
+    XCTAssertEqual([controller currentCandidateIndex], 1);
+}
+
+- (void)testCandidateSelectionChangedSyncsIndexToActualSelection {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"ecole"];
+    NSArray *candidates = [controller candidates:nil];
+    XCTAssertGreaterThan(candidates.count, 2);
+
+    // A mouse click (or any framework-driven selection change) should update the
+    // tracked index to match the candidate that was actually selected.
+    [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:candidates[2]]];
+
+    XCTAssertEqual([controller currentCandidateIndex], 3);
 }
 
 - (void)testCandidatePreviewKeepsOriginalInsertionIndex {
