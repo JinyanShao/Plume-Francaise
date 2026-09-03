@@ -124,7 +124,13 @@ static BOOL RequestHasTrustedOrigin(GCDWebServerRequest *request) {
     options[GCDWebServerOption_Port] = @(port);
     options[GCDWebServerOption_BindToLocalhost] = @YES;
 
-    [webServer startWithOptions:options error:nil];
+    NSError *error = nil;
+    if (![webServer startWithOptions:options error:&error]) {
+        NSLog(@"[PlumeFrancaise] Failed to start preferences server on port %d: %@", port, error);
+        return;
+    }
+
+    self.server = webServer;
 }
 
 @end
