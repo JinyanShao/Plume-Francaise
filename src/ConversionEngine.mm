@@ -321,7 +321,8 @@
         return;
     NSString *normalizedKey = [self normalizeFrenchText:key];
     [_subDbQueue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT OR REPLACE INTO substitutions (key, value) VALUES (?, ?)", normalizedKey, value];
+        if (![db executeUpdate:@"INSERT OR REPLACE INTO substitutions (key, value) VALUES (?, ?)", normalizedKey, value])
+            NSLog(@"[PlumeFrancaise] Failed to save substitution for %@: %@", normalizedKey, db.lastError);
     }];
     self.substitutions = [self loadSubstitutionsFromDB];
 }
@@ -331,7 +332,8 @@
         return;
     NSString *normalizedKey = [self normalizeFrenchText:key];
     [_subDbQueue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"DELETE FROM substitutions WHERE key = ?", normalizedKey];
+        if (![db executeUpdate:@"DELETE FROM substitutions WHERE key = ?", normalizedKey])
+            NSLog(@"[PlumeFrancaise] Failed to remove substitution for %@: %@", normalizedKey, db.lastError);
     }];
     self.substitutions = [self loadSubstitutionsFromDB];
 }
