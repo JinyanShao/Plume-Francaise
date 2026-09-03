@@ -76,6 +76,13 @@
         if (![normalized hasPrefix:prefix] || normalized.length <= prefix.length)
             continue;
         NSString *remainder = [normalized substringFromIndex:prefix.length];
+        // The user may have typed the apostrophe themselves (e.g. "c" + "'" + "est") rather
+        // than letting it be inferred from letters alone ("cest"); either way the remainder
+        // to look up is whatever comes after it.
+        if ([remainder hasPrefix:@"'"])
+            remainder = [remainder substringFromIndex:1];
+        if (remainder.length == 0)
+            continue;
         __block BOOL isWord = NO;
         [_frenchDbQueue inDatabase:^(FMDatabase *db) {
             FMResultSet *result = [db executeQuery:@"SELECT 1 FROM french_words WHERE normalized = ? LIMIT 1", remainder];

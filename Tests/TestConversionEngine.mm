@@ -80,6 +80,19 @@
     XCTAssertEqualObjects([self.engine getFrenchCandidates:@"quil"].firstObject, @"qu’il");
 }
 
+- (void)testElisionsWorkWhenApostropheIsAlreadyTyped {
+    // The apostrophe key extends the composition instead of committing (see
+    // InputController), so the buffer can already contain it (e.g. "c’est") instead of
+    // being inferred purely from letters (e.g. "cest"). Both must resolve the same way.
+    XCTAssertTrue([[self.engine getFrenchCandidates:@"c’est"] containsObject:@"c’est"]);
+    XCTAssertTrue([[self.engine getFrenchCandidates:@"l’homme"] containsObject:@"l’homme"]);
+    XCTAssertTrue([[self.engine getFrenchCandidates:@"qu’il"] containsObject:@"qu’il"]);
+
+    // A bare prefix + apostrophe with nothing typed after it yet shouldn't crash while
+    // looking for an elision - there's no word after it to look up.
+    XCTAssertNoThrow([self.engine getFrenchCandidates:@"c’"]);
+}
+
 - (void)testContextPrediction {
     NSArray *predictions = [self.engine predictFrenchWordsForContext:@"je suis" prefixFilter:@"h" maxResults:5];
     XCTAssertEqualObjects(predictions.firstObject, @"heureux");
