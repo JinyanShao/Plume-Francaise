@@ -2,6 +2,8 @@
 #import "InputController.h"
 #import <XCTest/XCTest.h>
 
+extern NSUserDefaults *preference;
+
 @interface InputController (Tests)
 - (BOOL)onKeyEvent:(NSEvent *)event client:(id)sender;
 - (NSArray *)candidates:(id)sender;
@@ -61,6 +63,10 @@
 
 - (void)setUp {
     self.engine = [ConversionEngine sharedEngine];
+}
+
+- (void)tearDown {
+    [preference setObject:@"unspecified" forKey:@"genderAgreement"];
 }
 
 - (void)testAccentCandidates {
@@ -175,6 +181,53 @@
     // Without an auxiliary already typed, present tense still leads as before.
     NSArray *plainForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:8];
     XCTAssertEqualObjects(plainForms.firstObject, @"vais");
+}
+
+- (void)testFeminineAgreementAppliesToJeTuOnInEtreCompoundTenses {
+    [preference setObject:@"feminine" forKey:@"genderAgreement"];
+
+    NSArray *jeForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:8];
+    XCTAssertTrue([jeForms containsObject:@"suis allée"]);
+    XCTAssertFalse([jeForms containsObject:@"suis allé"]);
+
+    NSArray *tuForms = [self.engine getFrenchConjugations:@"all" context:@"tu" maxResults:8];
+    XCTAssertTrue([tuForms containsObject:@"es allée"]);
+
+    NSArray *onForms = [self.engine getFrenchConjugations:@"all" context:@"on" maxResults:8];
+    XCTAssertTrue([onForms containsObject:@"est allée"]);
+
+    // The bare-participle path (auxiliary already typed separately) agrees too.
+    NSArray *afterAuxiliary = [self.engine getFrenchConjugations:@"all" context:@"je suis" maxResults:8];
+    XCTAssertEqualObjects(afterAuxiliary.firstObject, @"allée");
+}
+
+- (void)testFeminineAgreementDoesNotAffectFixedGenderSubjectsOrAvoirOrSimpleTenses {
+    [preference setObject:@"feminine" forKey:@"genderAgreement"];
+
+    // il/elle/nous/vous/ils/elles already carry the dictionary's built-in correct gender and
+    // must not get a second "e" appended on top of that.
+    NSArray *elleForms = [self.engine getFrenchConjugations:@"all" context:@"elle" maxResults:8];
+    XCTAssertTrue([elleForms containsObject:@"est allée"]);
+    XCTAssertFalse([elleForms containsObject:@"est alléee"]);
+
+    // avoir-based compound tenses never agree with the subject at all.
+    NSArray *avoirForms = [self.engine getFrenchConjugations:@"mange" context:@"je ai" maxResults:8];
+    XCTAssertEqualObjects(avoirForms.firstObject, @"mangé");
+    XCTAssertFalse([avoirForms containsObject:@"mangée"]);
+
+    // Simple tenses (no auxiliary) never vary by gender, preference or not.
+    NSArray *presentForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:20];
+    XCTAssertTrue([presentForms containsObject:@"vais"]);
+    XCTAssertFalse([presentForms containsObject:@"vaise"]);
+}
+
+- (void)testUnspecifiedOrMasculineGenderKeepsDictionaryMasculineForm {
+    NSArray *defaultForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:8];
+    XCTAssertTrue([defaultForms containsObject:@"suis allé"]);
+
+    [preference setObject:@"masculine" forKey:@"genderAgreement"];
+    NSArray *masculineForms = [self.engine getFrenchConjugations:@"all" context:@"je" maxResults:8];
+    XCTAssertTrue([masculineForms containsObject:@"suis allé"]);
 }
 
 - (void)testDirectObjectContextRanksAvoirFirst {
