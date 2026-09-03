@@ -3,7 +3,6 @@
 
 #import "InputApplicationDelegate.h"
 #import "InputController.h"
-#import "NSScreen+PointConversion.h"
 
 extern IMKCandidates *sharedCandidates;
 extern NSUserDefaults *preference;
@@ -12,8 +11,7 @@ extern ConversionEngine *engine;
 #define MAX_RECENT_WORDS 4
 
 typedef NSInteger KeyCode;
-static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC = 53, KEY_ARROW_DOWN = 125, KEY_ARROW_UP = 126,
-                     KEY_RIGHT_SHIFT = 60, KEY_RIGHT_COMMAND = 54;
+static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC = 53, KEY_ARROW_DOWN = 125, KEY_ARROW_UP = 126;
 
 @interface InputController ()
 
@@ -35,7 +33,7 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     bool handled = NO;
     switch (event.type) {
     case NSEventTypeFlagsChanged:
-        if (_lastEventTypes[1] == NSEventTypeFlagsChanged && _lastModifiers[1] == modifiers) {
+        if (_lastEventType == NSEventTypeFlagsChanged && _lastModifiers == modifiers) {
             return YES;
         }
         break;
@@ -58,10 +56,8 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         break;
     }
 
-    _lastModifiers[0] = _lastModifiers[1];
-    _lastEventTypes[0] = _lastEventTypes[1];
-    _lastModifiers[1] = modifiers;
-    _lastEventTypes[1] = event.type;
+    _lastModifiers = modifiers;
+    _lastEventType = event.type;
     return handled;
 }
 
@@ -117,48 +113,46 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         return YES;
     }
 
-    if ([self isMojaveAndLaterSystem]) {
-        BOOL isCandidatesVisible = [sharedCandidates isVisible];
-        if (isCandidatesVisible) {
-            if (keyCode == KEY_ARROW_DOWN) {
-                [sharedCandidates moveDown:self];
-                _currentCandidateIndex = MIN(_currentCandidateIndex + 1, (NSInteger)_candidates.count);
-                return YES;
-            }
-
-            if (keyCode == KEY_ARROW_UP) {
-                [sharedCandidates moveUp:self];
-                _currentCandidateIndex = MAX(_currentCandidateIndex - 1, 1);
-                return YES;
-            }
+    BOOL isCandidatesVisible = [sharedCandidates isVisible];
+    if (isCandidatesVisible) {
+        if (keyCode == KEY_ARROW_DOWN) {
+            [sharedCandidates moveDown:self];
+            _currentCandidateIndex = MIN(_currentCandidateIndex + 1, (NSInteger)_candidates.count);
+            return YES;
         }
 
-        if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
-            if (!hasBufferedText) {
-                [self appendToComposedBuffer:characters];
-                [self commitCompositionWithoutSpace:sender];
+        if (keyCode == KEY_ARROW_UP) {
+            [sharedCandidates moveUp:self];
+            _currentCandidateIndex = MAX(_currentCandidateIndex - 1, 1);
+            return YES;
+        }
+    }
+
+    if ([[NSCharacterSet decimalDigitCharacterSet] characterIsMember:ch]) {
+        if (!hasBufferedText) {
+            [self appendToComposedBuffer:characters];
+            [self commitCompositionWithoutSpace:sender];
+            return YES;
+        }
+
+        if (isCandidatesVisible) { // use 1~9 digital numbers as selection keys
+            NSInteger pressedNumber = characters.integerValue;
+            NSInteger pageSize = 9;
+            if (pressedNumber < 1 || pressedNumber > pageSize)
                 return YES;
-            }
 
-            if (isCandidatesVisible) { // use 1~9 digital numbers as selection keys
-                NSInteger pressedNumber = characters.integerValue;
-                NSInteger pageSize = 9;
-                if (pressedNumber < 1 || pressedNumber > pageSize)
-                    return YES;
-
-                NSInteger selectedCandidateIndex = MAX(_currentCandidateIndex - 1, 0);
-                NSInteger pageStartIndex = (selectedCandidateIndex / pageSize) * pageSize;
-                NSInteger candidateIndex = pageStartIndex + pressedNumber - 1;
-                if (candidateIndex >= (NSInteger)_candidates.count)
-                    return YES;
-
-                NSString *candidate = _candidates[candidateIndex];
-                [self cancelComposition];
-                [self setComposedBuffer:candidate];
-                [self setOriginalBuffer:candidate];
-                [self commitComposition:sender];
+            NSInteger selectedCandidateIndex = MAX(_currentCandidateIndex - 1, 0);
+            NSInteger pageStartIndex = (selectedCandidateIndex / pageSize) * pageSize;
+            NSInteger candidateIndex = pageStartIndex + pressedNumber - 1;
+            if (candidateIndex >= (NSInteger)_candidates.count)
                 return YES;
-            }
+
+            NSString *candidate = _candidates[candidateIndex];
+            [self cancelComposition];
+            [self setComposedBuffer:candidate];
+            [self setOriginalBuffer:candidate];
+            [self commitComposition:sender];
+            return YES;
         }
     }
 
@@ -203,11 +197,6 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     [self reset];
     if ([sentenceEndings containsObject:punctuation])
         [self resetContext];
-}
-
-- (BOOL)isMojaveAndLaterSystem {
-    NSOperatingSystemVersion version = [NSProcessInfo processInfo].operatingSystemVersion;
-    return (version.majorVersion == 10 && version.minorVersion > 13) || version.majorVersion > 10;
 }
 
 - (BOOL)deleteBackward:(id)sender {
@@ -280,8 +269,6 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     [sharedCandidates hide];
     _candidates = [[NSMutableArray alloc] init];
     [sharedCandidates setCandidateData:@[]];
-    [_annotationWin setAnnotation:@""];
-    [_annotationWin hideWindow];
 }
 
 - (void)resetContext {
@@ -443,10 +430,6 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
 - (void)activateServer:(id)sender {
     [sender overrideKeyboardWithKeyboardNamed:@"com.apple.keylayout.US"];
 
-    if (_annotationWin == nil) {
-        _annotationWin = [AnnotationWinController sharedController];
-    }
-
     _currentCandidateIndex = 1;
     _candidates = [[NSMutableArray alloc] init];
     _recentWords = [[NSMutableArray alloc] init];
@@ -486,10 +469,6 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
                 NSLog(@"Failed to run the app: %@", error.localizedDescription);
             }
         }];
-}
-
-- (void)showAnnotation:(NSAttributedString *)candidateString {
-    [_annotationWin hideWindow];
 }
 
 @end

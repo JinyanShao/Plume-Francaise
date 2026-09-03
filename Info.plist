@@ -32,8 +32,6 @@
 	<string>NO</string>
 	<key>LSUIElement</key>
 	<true/>
-	<key>NSMainNibFile</key>
-	<string>AnnotationWindow</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSHumanReadableCopyright</key>
