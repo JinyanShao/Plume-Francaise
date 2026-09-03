@@ -116,12 +116,14 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     BOOL isCandidatesVisible = [sharedCandidates isVisible];
     if (isCandidatesVisible) {
         if (keyCode == KEY_ARROW_DOWN) {
+            _hasNavigatedCandidates = YES;
             [sharedCandidates moveDown:self];
             _currentCandidateIndex = MIN(_currentCandidateIndex + 1, (NSInteger)_candidates.count);
             return YES;
         }
 
         if (keyCode == KEY_ARROW_UP) {
+            _hasNavigatedCandidates = YES;
             [sharedCandidates moveUp:self];
             _currentCandidateIndex = MAX(_currentCandidateIndex - 1, 1);
             return YES;
@@ -265,6 +267,7 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     [self setOriginalBuffer:@""];
     _insertionIndex = 0;
     _currentCandidateIndex = 1;
+    _hasNavigatedCandidates = NO;
     [sharedCandidates clearSelection];
     [sharedCandidates hide];
     _candidates = [[NSMutableArray alloc] init];
@@ -403,12 +406,14 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
                                                           maxResults:50];
             _candidates = [NSMutableArray arrayWithArray:result];
             _currentCandidateIndex = 1;
+            _hasNavigatedCandidates = NO;
             return result;
         }
     }
 
     _candidates = [NSMutableArray arrayWithArray:candidateList];
     _currentCandidateIndex = 1;
+    _hasNavigatedCandidates = NO;
     return candidateList;
 }
 
@@ -419,7 +424,13 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     if (selectedIndex != NSNotFound)
         _currentCandidateIndex = (NSInteger)selectedIndex + 1;
 
-    [self showPreeditString:candidateString.string];
+    // IMKCandidates fires this the instant a fresh list appears too, auto-highlighting the
+    // first entry - not just when the user actually moves the selection. Previewing that
+    // in the document itself would silently rewrite "cont" into "continue" before anyone
+    // asked for it. Only show the highlighted candidate inline once arrow-key navigation
+    // has actually happened; otherwise leave the marked text as what was really typed.
+    if (_hasNavigatedCandidates)
+        [self showPreeditString:candidateString.string];
 
     _insertionIndex = [self originalBuffer].length;
 }
