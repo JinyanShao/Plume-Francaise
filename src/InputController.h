@@ -1,7 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import <InputMethodKit/InputMethodKit.h>
 
-#import "AnnotationWinController.h"
 #import "ConversionEngine.h"
 
 @interface InputController : IMKInputController {
@@ -11,9 +10,8 @@
     NSInteger _currentCandidateIndex;
     NSMutableArray *_candidates;
     id _currentClient;
-    NSUInteger _lastModifiers[2];
-    NSEventType _lastEventTypes[2];
-    AnnotationWinController *_annotationWin;
+    NSUInteger _lastModifiers;
+    NSEventType _lastEventType;
     NSMutableArray<NSString *> *_recentWords;
 }
 
