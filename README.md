@@ -1,5 +1,7 @@
 # Plume Française
 
+[![CI](https://github.com/JinyanShao/Plume-Francaise/actions/workflows/ci.yml/badge.svg)](https://github.com/JinyanShao/Plume-Francaise/actions/workflows/ci.yml)
+
 Plume Française is a native macOS input method for writing French with accents, typographic punctuation, spelling corrections, and context-aware suggestions. It works locally on the Mac.
 
 ## See It in Action
@@ -76,6 +78,8 @@ Personal substitutions are stored locally in:
 
 Recent words used for contextual ranking are kept in the running input-method process. There is no account, cloud synchronization, analytics service, or remote language model involved in text conversion.
 
+The preferences page has a "Check for updates" button. It is the only network request Plume Française ever makes, only runs when clicked, and only asks GitHub for the latest release number — no typed text, substitutions, or identifying information is sent.
+
 See [PRIVACY.md](PRIVACY.md) for the project's privacy statement.
 
 ## How It Works
@@ -135,7 +139,7 @@ Runtime dependencies are managed with CocoaPods: FMDB for SQLite access, GCDWebS
 Run the native test suite with:
 
 ```sh
-sh unit-tests.sh
+bash unit-tests.sh
 ```
 
 Source formatting and a Release build can be checked separately:

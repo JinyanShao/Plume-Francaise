@@ -27,6 +27,9 @@ xcodebuild \
 ditto \
     "${BUILD_ROOT}/DerivedData/Build/Products/Release/PlumeFrancaise.app" \
     "${BUILD_ROOT}/root/${APP_NAME}"
+
+# Technical preview release chain: this app is ad-hoc signed and not notarized.
+# It is not a Developer ID signature.
 xattr -cr "${BUILD_ROOT}/root/${APP_NAME}"
 codesign --force --deep --sign - "${BUILD_ROOT}/root/${APP_NAME}"
 xattr -cr "${BUILD_ROOT}/root/${APP_NAME}"

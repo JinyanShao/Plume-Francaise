@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plume Francaise Preferences</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="icon.png" alt="" width="64" height="64">
+      <div>
+        <p class="eyebrow">Plume Francaise</p>
+        <h1>Preferences</h1>
+      </div>
+    </header>
+
+    <section aria-labelledby="usage-title">
+      <div>
+        <h2 id="usage-title">How to use</h2>
+        <p>Start typing after selecting Plume Française from the input menu. The candidate window updates as you go.</p>
+      </div>
+      <ul class="usage-list">
+        <li><strong>&uarr; / &darr;</strong> — move through candidates.</li>
+        <li><strong>1&ndash;9</strong> — pick a candidate on the current page directly.</li>
+        <li><strong>Space</strong> — commit the highlighted candidate and insert a trailing space.</li>
+        <li><strong>Return</strong> — commit without adding a space.</li>
+        <li><strong>Escape</strong> — cancel the current composition.</li>
+        <li>Typing <code>;</code>, <code>:</code>, <code>!</code> or <code>?</code> after a word commits it with French spacing automatically.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="typing-title">
+      <div>
+        <h2 id="typing-title">Typing</h2>
+        <p>Choose how committed candidates behave while writing.</p>
+      </div>
+      <label class="toggle">
+        <input id="commitWordWithSpace" type="checkbox">
+        <span>
+          <strong>Commit word with Space</strong>
+          <small>Add a space after accepting the current candidate with Space.</small>
+        </span>
+      </label>
+    </section>
+
+    <section aria-labelledby="substitutions-title">
+      <div>
+        <h2 id="substitutions-title">Personal substitutions</h2>
+        <p>Add words or phrases Plume Francaise should suggest locally on this Mac.</p>
+      </div>
+
+      <form id="substitutionForm" class="substitution-form">
+        <label>
+          <span>Input</span>
+          <input id="substitutionKey" name="key" autocomplete="off" required>
+        </label>
+        <label>
+          <span>Suggestion</span>
+          <input id="substitutionValue" name="value" autocomplete="off" required>
+        </label>
+        <button type="submit">Add</button>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Input</th>
+            <th>Suggestion</th>
+            <th><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="substitutions"></tbody>
+      </table>
+      <p id="emptyState" class="empty">No personal substitutions yet.</p>
+    </section>
+
+    <section aria-labelledby="updates-title">
+      <div>
+        <h2 id="updates-title">Updates</h2>
+        <p>Plume Francaise never contacts the network on its own. Checking asks GitHub for the latest release and nothing else.</p>
+      </div>
+      <div class="update-row">
+        <button id="checkUpdateButton" type="button">Check for updates</button>
+        <span id="updateStatus"></span>
+      </div>
+    </section>
+
+    <p id="status" role="status" aria-live="polite"></p>
+  </main>
+</body>
+</html>

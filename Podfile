@@ -17,7 +17,7 @@ post_install do |installer|
   installer.generated_projects.each do |project|
     project.targets.each do |target|
         target.build_configurations.each do |config|
-            config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = 'RECOMMENDED_MACOSX_DEPLOYMENT_TARGET'
+            config.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '13.5'
          end
     end
   end
