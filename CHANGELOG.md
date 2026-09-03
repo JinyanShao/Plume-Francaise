@@ -27,6 +27,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   mot valide, faute d'ignorer cette apostrophe déjà présente dans la
   composition en cours ; elle est maintenant reconnue quel que soit le
   préfixe concerné
+- Une élision techniquement possible mais rare (par exemple `m'o`, à partir
+  du mot peu courant « o ») pouvait passer devant un mot du dictionnaire
+  bien plus fréquent avec le même préfixe (`mon`) ; l'élision ne passe
+  maintenant devant les correspondances du dictionnaire que si le mot dont
+  elle dépend est effectivement le plus fréquent des deux
 
 ## 1.1.0 — 3 septembre 2026
 

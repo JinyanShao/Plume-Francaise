@@ -70,7 +70,11 @@
     return candidate;
 }
 
-- (NSString *)elidedCandidateForInput:(NSString *)input {
+// Returns @{"candidate": ..., "frequency": ...} for the best elision match, or nil. The
+// frequency (of the word after the apostrophe) lets the caller weigh this against plain
+// dictionary prefix matches instead of always trusting it blindly - "o" is a real word, but
+// treating "m'o" as more relevant than "mon" just because it's an elision would be wrong.
+- (NSDictionary *)elidedCandidateForInput:(NSString *)input {
     NSString *normalized = [self normalizeFrenchText:input];
     for (NSString *prefix in @[ @"qu", @"l", @"j", @"c", @"d", @"n", @"m", @"s", @"t" ]) {
         if (![normalized hasPrefix:prefix] || normalized.length <= prefix.length)
@@ -84,14 +88,21 @@
         if (remainder.length == 0)
             continue;
         __block BOOL isWord = NO;
+        __block long long frequency = 0;
         [_frenchDbQueue inDatabase:^(FMDatabase *db) {
-            FMResultSet *result = [db executeQuery:@"SELECT 1 FROM french_words WHERE normalized = ? LIMIT 1", remainder];
-            isWord = [result next];
+            FMResultSet *result = [db executeQuery:@"SELECT frequency FROM french_words WHERE normalized = ? LIMIT 1", remainder];
+            if ([result next]) {
+                isWord = YES;
+                frequency = [result longLongIntForColumn:@"frequency"];
+            }
             [result close];
         }];
         if (isWord) {
             NSString *candidate = [NSString stringWithFormat:@"%@’%@", prefix, remainder];
-            return [self candidate:candidate matchingCaseOfInput:input];
+            return @{
+                @"candidate" : [self candidate:candidate matchingCaseOfInput:input],
+                @"frequency" : @(frequency),
+            };
         }
     }
     return nil;
@@ -239,8 +250,9 @@
     __block NSMutableArray *exactMatches = [NSMutableArray array];
     __block NSMutableArray *prefixMatches = [NSMutableArray array];
     __block BOOL hasExactMatch = NO;
+    __block long long topPrefixMatchFrequency = 0;
     [_frenchDbQueue inDatabase:^(FMDatabase *db) {
-        FMResultSet *result = [db executeQuery:@"SELECT normalized, word FROM french_words WHERE normalized LIKE ? "
+        FMResultSet *result = [db executeQuery:@"SELECT normalized, word, frequency FROM french_words WHERE normalized LIKE ? "
                                                @"ORDER BY CASE WHEN normalized = ? THEN 0 ELSE 1 END, frequency DESC LIMIT 40",
                                                pattern, normalized];
         while ([result next]) {
@@ -248,23 +260,33 @@
             if (isExactMatch)
                 hasExactMatch = YES;
             NSString *word = [self candidate:[result stringForColumn:@"word"] matchingCaseOfInput:originalInput];
-            if (word.length > 0 && isExactMatch)
+            if (word.length > 0 && isExactMatch) {
                 [exactMatches addObject:word];
-            else if (word.length > 0)
+            } else if (word.length > 0) {
+                if (prefixMatches.count == 0)
+                    topPrefixMatchFrequency = [result longLongIntForColumn:@"frequency"];
                 [prefixMatches addObject:word];
+            }
         }
         [result close];
     }];
 
     NSString *substitution = self.substitutions[normalized];
-    NSString *elided = [self elidedCandidateForInput:originalInput];
+    NSDictionary *elidedInfo = [self elidedCandidateForInput:originalInput];
+    NSString *elided = elidedInfo[@"candidate"];
+    // An elision is only more useful than the dictionary's best plain prefix match when the
+    // word it's built from is actually the more common one - otherwise a rare word that
+    // happens to complete the elision (e.g. "o" for "m'o") would bury common words like "mon".
+    BOOL elisionLeadsPrefixMatches =
+        elided && (prefixMatches.count == 0 || [elidedInfo[@"frequency"] longLongValue] >= topPrefixMatchFrequency);
     NSArray *conjugations = [self getFrenchConjugations:originalInput maxResults:12];
     NSArray *corrections = hasExactMatch ? @[] : [self getFrenchSpellingCorrections:originalInput maxResults:8];
     return [self mergeFrenchCandidateGroups:@[
         substitution ? @[ substitution ] : @[],
         exactMatches,
-        elided ? @[ elided ] : @[],
+        elisionLeadsPrefixMatches ? @[ elided ] : @[],
         prefixMatches,
+        elided && !elisionLeadsPrefixMatches ? @[ elided ] : @[],
         conjugations,
         corrections,
         @[ originalInput ],
