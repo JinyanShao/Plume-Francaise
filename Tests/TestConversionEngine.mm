@@ -6,10 +6,23 @@
 - (BOOL)onKeyEvent:(NSEvent *)event client:(id)sender;
 - (NSArray *)candidates:(id)sender;
 - (void)candidateSelectionChanged:(NSAttributedString *)candidateString;
+- (void)commitFrenchPunctuation:(NSString *)punctuation client:(id)sender;
+@end
+
+@interface FakeInsertClient : NSObject
+@property(nonatomic, copy) NSString *insertedText;
+@end
+
+@implementation FakeInsertClient
+- (void)insertText:(id)aString replacementRange:(NSRange)replacementRange {
+    self.insertedText = [aString isKindOfClass:[NSAttributedString class]] ? [(NSAttributedString *)aString string] : aString;
+}
 @end
 
 @interface TestInputController : InputController
 - (NSInteger)insertionIndex;
+- (NSInteger)currentCandidateIndex;
+- (void)setCurrentCandidateIndex:(NSInteger)index;
 @end
 
 @implementation TestInputController
@@ -19,6 +32,14 @@
 
 - (NSInteger)insertionIndex {
     return _insertionIndex;
+}
+
+- (NSInteger)currentCandidateIndex {
+    return _currentCandidateIndex;
+}
+
+- (void)setCurrentCandidateIndex:(NSInteger)index {
+    _currentCandidateIndex = index;
 }
 
 @end
@@ -262,6 +283,35 @@
     XCTAssertFalse([controller onKeyEvent:event client:nil]);
 }
 
+- (void)testCandidateIndexResetsWhenCandidateListRebuilds {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"ecole"];
+    [controller candidates:nil];
+
+    // Simulate having navigated away from the top of the list with the arrow keys.
+    [controller setCurrentCandidateIndex:5];
+
+    // Retyping (or backspacing) rebuilds the candidate list, which should reset the
+    // selection back to the top instead of leaving the stale index from before.
+    [controller setOriginalBuffer:@"ecole"];
+    [controller candidates:nil];
+
+    XCTAssertEqual([controller currentCandidateIndex], 1);
+}
+
+- (void)testCandidateSelectionChangedSyncsIndexToActualSelection {
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller setOriginalBuffer:@"ecole"];
+    NSArray *candidates = [controller candidates:nil];
+    XCTAssertGreaterThan(candidates.count, 2);
+
+    // A mouse click (or any framework-driven selection change) should update the
+    // tracked index to match the candidate that was actually selected.
+    [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:candidates[2]]];
+
+    XCTAssertEqual([controller currentCandidateIndex], 3);
+}
+
 - (void)testCandidatePreviewKeepsOriginalInsertionIndex {
     TestInputController *controller = [[TestInputController alloc] init];
     [controller setOriginalBuffer:@"ecole"];
@@ -269,6 +319,50 @@
     [controller candidateSelectionChanged:[[NSAttributedString alloc] initWithString:@"é"]];
 
     XCTAssertEqual([controller insertionIndex], [controller originalBuffer].length);
+}
+
+- (void)testSpacedPunctuationGetsNarrowNoBreakSpaceBefore {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"bonjour"];
+
+    [controller commitFrenchPunctuation:@"!" client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"bonjour ! ");
+}
+
+- (void)testCommaAndPeriodGetTrailingSpaceOnly {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"bonjour"];
+
+    [controller commitFrenchPunctuation:@"," client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"bonjour, ");
+}
+
+- (void)testOtherPunctuationIsAppendedWithNoSpacing {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller setOriginalBuffer:@"exemple"];
+
+    [controller commitFrenchPunctuation:@")" client:client];
+
+    XCTAssertEqualObjects(client.insertedText, @"exemple)");
+}
+
+- (void)testSentenceEndingPunctuationResetsContextButNotOthers {
+    TestInputController *controller = [[TestInputController alloc] init];
+    FakeInsertClient *client = [[FakeInsertClient alloc] init];
+    [controller recordCommittedWord:@"bonjour"];
+
+    [controller setOriginalBuffer:@"monde"];
+    [controller commitFrenchPunctuation:@"," client:client];
+    XCTAssertEqualObjects([controller recentContext], @"bonjour monde");
+
+    [controller setOriginalBuffer:@"fin"];
+    [controller commitFrenchPunctuation:@"." client:client];
+    XCTAssertNil([controller recentContext]);
 }
 
 @end

@@ -2,6 +2,23 @@
 
 Toutes les modifications importantes sont documentées dans ce fichier.
 
+## Non publié
+
+### Ajouts
+
+- Bouton « Check for updates » dans la page de préférences (seule requête
+  réseau de l’application, déclenchée uniquement sur clic)
+- Section « How to use » dans la page de préférences
+
+### Corrections
+
+- Sélection d’un candidat par touche numérique (1-9) qui pouvait ne plus
+  correspondre au candidat réellement affiché après une navigation aux
+  flèches, une correction ou une sélection à la souris
+- Le serveur de préférences local exigeait désormais un en-tête `Origin`
+  correspondant pour toute requête qui modifie l’état, afin d’empêcher une
+  page web tierce de le piloter à l’insu de l’utilisateur
+
 ## 1.0.0 — 28 juillet 2026
 
 ### Ajouts

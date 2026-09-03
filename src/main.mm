@@ -85,8 +85,6 @@ int main(int argc, char *argv[]) {
 
     engine = [ConversionEngine sharedEngine];
 
-    [[NSBundle mainBundle] loadNibNamed:@"AnnotationWindow" owner:[NSApplication sharedApplication] topLevelObjects:nil];
-
     [[NSBundle mainBundle] loadNibNamed:@"PreferencesMenu" owner:[NSApplication sharedApplication] topLevelObjects:nil];
 
     initPreference();

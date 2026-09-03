@@ -37,14 +37,18 @@
     NSString *supportDir = [applicationSupport stringByAppendingPathComponent:@"PlumeFrancaise"];
     NSString *legacySupportDir = [applicationSupport stringByAppendingPathComponent:@"JinyanShaoFrenchInputMethod"];
     NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error = nil;
     if (![fileManager fileExistsAtPath:supportDir] && [fileManager fileExistsAtPath:legacySupportDir]) {
-        [fileManager moveItemAtPath:legacySupportDir toPath:supportDir error:nil];
+        if (![fileManager moveItemAtPath:legacySupportDir toPath:supportDir error:&error])
+            NSLog(@"[PlumeFrancaise] Failed to migrate legacy substitutions directory: %@", error);
     }
-    [fileManager createDirectoryAtPath:supportDir withIntermediateDirectories:YES attributes:nil error:nil];
+    if (![fileManager createDirectoryAtPath:supportDir withIntermediateDirectories:YES attributes:nil error:&error])
+        NSLog(@"[PlumeFrancaise] Failed to create Application Support directory at %@: %@", supportDir, error);
     NSString *dbPath = [supportDir stringByAppendingPathComponent:@"substitutions.sqlite3"];
     _subDbQueue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
     [_subDbQueue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"CREATE TABLE IF NOT EXISTS substitutions (key TEXT PRIMARY KEY, value TEXT)"];
+        if (![db executeUpdate:@"CREATE TABLE IF NOT EXISTS substitutions (key TEXT PRIMARY KEY, value TEXT)"])
+            NSLog(@"[PlumeFrancaise] Failed to create substitutions table: %@", db.lastError);
     }];
 }
 
@@ -317,7 +321,8 @@
         return;
     NSString *normalizedKey = [self normalizeFrenchText:key];
     [_subDbQueue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"INSERT OR REPLACE INTO substitutions (key, value) VALUES (?, ?)", normalizedKey, value];
+        if (![db executeUpdate:@"INSERT OR REPLACE INTO substitutions (key, value) VALUES (?, ?)", normalizedKey, value])
+            NSLog(@"[PlumeFrancaise] Failed to save substitution for %@: %@", normalizedKey, db.lastError);
     }];
     self.substitutions = [self loadSubstitutionsFromDB];
 }
@@ -327,7 +332,8 @@
         return;
     NSString *normalizedKey = [self normalizeFrenchText:key];
     [_subDbQueue inDatabase:^(FMDatabase *db) {
-        [db executeUpdate:@"DELETE FROM substitutions WHERE key = ?", normalizedKey];
+        if (![db executeUpdate:@"DELETE FROM substitutions WHERE key = ?", normalizedKey])
+            NSLog(@"[PlumeFrancaise] Failed to remove substitution for %@: %@", normalizedKey, db.lastError);
     }];
     self.substitutions = [self loadSubstitutionsFromDB];
 }
