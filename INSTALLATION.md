@@ -49,6 +49,20 @@ téléchargée, vous pouvez retirer l’attribut de quarantaine manuellement :
 xattr -dr com.apple.quarantine "$HOME/Library/Input Methods/Plume-Francaise.app"
 ```
 
+macOS affiche systématiquement un avertissement générique pour toute méthode de
+saisie tierce (« le développeur peut accéder à tout ce que vous saisissez »)
+lorsque vous consultez ses réglages dans **Réglages Système → Clavier → Sources
+d’entrée**. Ce message est affiché pour toutes les méthodes de saisie non
+signées par Apple, quel que soit leur fonctionnement réel ; voir
+[PRIVACY.md](PRIVACY.md) pour ce que fait réellement Plume Française.
+
+Sur certaines versions récentes de macOS, activer une méthode de saisie tierce
+pour la première fois peut provoquer la fermeture inattendue de l’application
+au premier plan au moment du changement. Il s’agit d’un problème dans le
+composant système `TextInputUIMacHelper` d’Apple qui affiche la bulle « méthode
+de saisie changée », pas d’un problème de Plume Française ; rouvrez simplement
+l’application concernée.
+
 ## Première utilisation
 
 Sélectionnez l’icône de saisie dans la barre des menus, puis choisissez
