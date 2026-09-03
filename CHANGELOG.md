@@ -22,6 +22,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   l'apostrophe prolonge maintenant la composition comme une lettre normale,
   pour continuer à taper `c'est`, `c'était`… et valider soi-même avec
   Espace ou Retour
+- Une fois l'apostrophe ainsi tapée à la main, l'élision correspondante
+  (`c'est`, `l'homme`, `qu'il`, `d'accord`…) n'était plus reconnue comme un
+  mot valide, faute d'ignorer cette apostrophe déjà présente dans la
+  composition en cours ; elle est maintenant reconnue quel que soit le
+  préfixe concerné
 
 ## 1.1.0 — 3 septembre 2026
 
