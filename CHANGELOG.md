@@ -32,6 +32,13 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   bien plus fréquent avec le même préfixe (`mon`) ; l'élision ne passe
   maintenant devant les correspondances du dictionnaire que si le mot dont
   elle dépend est effectivement le plus fréquent des deux
+- Après avoir déjà tapé l'auxiliaire séparément (« je » puis « suis », par
+  exemple), continuer avec le verbe (`all`) proposait le présent (`vais`)
+  en tête plutôt que le participe attendu, et la forme composée du
+  dictionnaire (`suis allé`) aurait de toute façon répété l'auxiliaire déjà
+  présent dans le document ; le participe seul (`allé`) est maintenant
+  proposé en premier dès que l'auxiliaire correspondant au sujet a déjà été
+  tapé, pour être et avoir
 
 ## 1.1.0 — 3 septembre 2026
 

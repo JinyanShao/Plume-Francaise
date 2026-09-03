@@ -148,6 +148,47 @@
     return [directObjects containsObject:lastPart];
 }
 
+// If the user already typed the auxiliary itself (e.g. "je" then "suis", committed
+// separately, then starts typing the verb), the context's last word IS that auxiliary -
+// not just a hint that one might be needed. In that case the useful suggestion is the bare
+// past participle ("allé"), not the full "suis allé" phrase stored in the dictionary, which
+// would duplicate the "suis" already sitting in the document. Returns nil unless the last
+// context word exactly matches the present-tense être/avoir form for the given subject.
+- (NSString *)participleForAuxiliaryAlreadyTypedInContext:(NSString *)context subject:(NSString *)subject lemmaPattern:(NSString *)pattern {
+    if (subject.length == 0)
+        return nil;
+    NSString *lastPart = [[self normalizeFrenchText:context ?: @""] componentsSeparatedByString:@" "].lastObject;
+    if (lastPart.length == 0)
+        return nil;
+    NSDictionary *etrePresent = @{
+        @"je" : @"suis", @"tu" : @"es", @"il" : @"est", @"elle" : @"est", @"on" : @"est",
+        @"nous" : @"sommes", @"vous" : @"etes", @"ils" : @"sont", @"elles" : @"sont"
+    };
+    NSDictionary *avoirPresent = @{
+        @"je" : @"ai", @"tu" : @"as", @"il" : @"a", @"elle" : @"a", @"on" : @"a",
+        @"nous" : @"avons", @"vous" : @"avez", @"ils" : @"ont", @"elles" : @"ont"
+    };
+    if (![etrePresent[subject] isEqualToString:lastPart] && ![avoirPresent[subject] isEqualToString:lastPart])
+        return nil;
+
+    __block NSString *participle = nil;
+    NSString *auxiliaryPrefix = [lastPart stringByAppendingString:@" "];
+    [_frenchDbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet *result = [db executeQuery:@"SELECT form, form_normalized FROM french_conjugations "
+                                               @"WHERE lemma_normalized LIKE ? AND subject = ? AND tense = 'past_compound' "
+                                               @"ORDER BY verb_frequency DESC LIMIT 20",
+                                               pattern, subject];
+        while ([result next]) {
+            if ([[result stringForColumn:@"form_normalized"] hasPrefix:auxiliaryPrefix]) {
+                participle = [[result stringForColumn:@"form"] substringFromIndex:auxiliaryPrefix.length];
+                break;
+            }
+        }
+        [result close];
+    }];
+    return participle;
+}
+
 - (NSArray *)getFrenchConjugations:(NSString *)input context:(NSString *)context maxResults:(NSInteger)max {
     if (!_frenchDbQueue || input.length == 0 || max <= 0)
         return @[];
@@ -156,6 +197,11 @@
     NSString *subject = [self subjectForContext:context];
     BOOL preferAvoir = [self contextPrefersAvoir:context];
     __block NSMutableOrderedSet *forms = [NSMutableOrderedSet orderedSet];
+
+    NSString *participleAfterAuxiliary = [self participleForAuxiliaryAlreadyTypedInContext:context subject:subject lemmaPattern:pattern];
+    if (participleAfterAuxiliary.length > 0)
+        [forms addObject:[self candidate:participleAfterAuxiliary matchingCaseOfInput:input]];
+
     [_frenchDbQueue inDatabase:^(FMDatabase *db) {
         FMResultSet *result = [db executeQuery:@"SELECT form FROM french_conjugations "
                                                @"WHERE lemma_normalized LIKE ? OR form_normalized LIKE ? "
