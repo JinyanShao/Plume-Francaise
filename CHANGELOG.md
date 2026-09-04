@@ -11,6 +11,11 @@ Toutes les modifications importantes sont documentées dans ce fichier.
 - La première fois que Plume Française est activée, la page de préférences s'ouvre
   automatiquement sur la section « Mode d'emploi », pour ne pas laisser l'utilisateur
   découvrir seul le fonctionnement des candidats ; cela ne se produit qu'une seule fois
+- Réglages rapides directement dans le menu de saisie (« Valider le mot avec Espace » et
+  un sous-menu « Genre ») pour changer ces deux préférences sans ouvrir la page de
+  préférences ; les deux surfaces partagent le même réglage et restent synchronisées.
+  Les intitulés du menu (« Préférences », « À propos ») sont passés en français au
+  passage, pour rester cohérents avec le reste
 - Préférence « Grammaire » dans la page de préférences pour indiquer son propre genre
   (masculin, féminin ou non précisé) ; quand « je », « tu » ou « on » est le sujet d'un
   temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
