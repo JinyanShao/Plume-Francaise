@@ -29,6 +29,9 @@ Toutes les modifications importantes sont documentées dans ce fichier.
 
 ### Corrections
 
+- Suppression de l'entrée de menu « Upgrade », restée sans aucune action associée
+  depuis toujours (elle ne faisait rien au clic) ; la mise à jour se fait déjà via la
+  page de préférences
 - Un préfixe d'une ou deux lettres tapé après un contexte reconnu (par
   exemple `mo` après `je`) ne bascule plus directement sur la forme conjuguée
   du verbe le plus fréquent correspondant (`meurs`, pour `mourir`) ; les mots

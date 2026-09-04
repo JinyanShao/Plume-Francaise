@@ -15,9 +15,6 @@
         <menu title="Menu" id="H8n-qw-MXu">
             <items>
                 <menuItem title="Préférences" tag="1" id="lKW-or-zoD"/>
-                <menuItem title="Upgrade" id="W4U-UV-5uT">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                </menuItem>
                 <menuItem isSeparatorItem="YES" id="sep-quick-top"/>
                 <menuItem title="Valider le mot avec Espace" id="cws-menu-item">
                     <modifierMask key="keyEquivalentModifierMask"/>
