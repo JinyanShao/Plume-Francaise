@@ -1,7 +1,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface InputApplicationDelegate : NSObject {
+@interface InputApplicationDelegate : NSObject <NSMenuDelegate> {
     IBOutlet NSMenu *_menu;
     IBOutlet NSMenuItem *_aboutMenuItem;
 }

@@ -14,11 +14,32 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <menu title="Menu" id="H8n-qw-MXu">
             <items>
-                <menuItem title="Preferences" tag="1" id="lKW-or-zoD"/>
+                <menuItem title="Préférences" tag="1" id="lKW-or-zoD"/>
                 <menuItem title="Upgrade" id="W4U-UV-5uT">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
-                <menuItem title="About" id="qhh-J9-DhA">
+                <menuItem isSeparatorItem="YES" id="sep-quick-top"/>
+                <menuItem title="Valider le mot avec Espace" id="cws-menu-item">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="Genre" id="genre-menu-item">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <menu key="submenu" title="Genre" id="genre-submenu">
+                        <items>
+                            <menuItem title="Non précisé" id="gender-unspecified-item">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Masculin" id="gender-masculine-item">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                            <menuItem title="Féminin" id="gender-feminine-item">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                            </menuItem>
+                        </items>
+                    </menu>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="sep-quick-bottom"/>
+                <menuItem title="À propos" id="qhh-J9-DhA">
                     <modifierMask key="keyEquivalentModifierMask"/>
                 </menuItem>
             </items>
