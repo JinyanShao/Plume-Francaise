@@ -454,6 +454,14 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
     _currentCandidateIndex = 1;
     _candidates = [[NSMutableArray alloc] init];
     _recentWords = [[NSMutableArray alloc] init];
+
+    // activateServer: fires every time the user switches back into this input source, which
+    // happens constantly in normal use - the preferences page's "Mode d'emploi" section
+    // should only pop up unprompted the very first time, not on every switch.
+    if (![preference boolForKey:@"hasShownOnboarding"]) {
+        [preference setBool:YES forKey:@"hasShownOnboarding"];
+        [self showIMEPreferences:sender];
+    }
 }
 
 - (void)deactivateServer:(id)sender {

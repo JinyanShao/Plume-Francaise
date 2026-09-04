@@ -9,6 +9,8 @@ extern NSUserDefaults *preference;
 - (NSArray *)candidates:(id)sender;
 - (void)candidateSelectionChanged:(NSAttributedString *)candidateString;
 - (void)commitFrenchPunctuation:(NSString *)punctuation client:(id)sender;
+- (void)activateServer:(id)sender;
+- (void)showIMEPreferences:(id)sender;
 @end
 
 @interface FakeInsertClient : NSObject
@@ -24,6 +26,7 @@ extern NSUserDefaults *preference;
 @interface TestInputController : InputController
 @property(nonatomic, copy) NSString *lastPreeditString;
 @property(nonatomic) NSInteger preeditCallCount;
+@property(nonatomic) NSInteger onboardingShownCount;
 - (NSInteger)insertionIndex;
 - (NSInteger)currentCandidateIndex;
 - (void)setCurrentCandidateIndex:(NSInteger)index;
@@ -35,6 +38,12 @@ extern NSUserDefaults *preference;
 - (void)showPreeditString:(NSString *)input {
     self.lastPreeditString = input;
     self.preeditCallCount++;
+}
+
+// Overridden so testing the onboarding trigger doesn't actually open a real browser tab via
+// NSWorkspace.
+- (void)showIMEPreferences:(id)sender {
+    self.onboardingShownCount++;
 }
 
 - (NSInteger)insertionIndex {
@@ -67,6 +76,7 @@ extern NSUserDefaults *preference;
 
 - (void)tearDown {
     [preference setObject:@"unspecified" forKey:@"genderAgreement"];
+    [preference removeObjectForKey:@"hasShownOnboarding"];
 }
 
 - (void)testAccentCandidates {
@@ -572,6 +582,19 @@ extern NSUserDefaults *preference;
     [controller setOriginalBuffer:@"fin"];
     [controller commitFrenchPunctuation:@"." client:client];
     XCTAssertNil([controller recentContext]);
+}
+
+- (void)testOnboardingShownOnlyOnFirstActivation {
+    // activateServer: fires on every switch back into this input source, which happens
+    // constantly in normal use - the unprompted preferences page must only appear once ever,
+    // not every time.
+    TestInputController *controller = [[TestInputController alloc] init];
+    [controller activateServer:nil];
+    XCTAssertEqual(controller.onboardingShownCount, 1);
+
+    [controller activateServer:nil];
+    [controller activateServer:nil];
+    XCTAssertEqual(controller.onboardingShownCount, 1);
 }
 
 @end
