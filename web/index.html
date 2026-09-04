@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Plume Francaise Preferences</title>
+  <title>Préférences de Plume Française</title>
   <link rel="stylesheet" href="index.css">
   <script src="index.js" defer></script>
 </head>
@@ -12,93 +12,93 @@
     <header>
       <img src="icon.png" alt="" width="64" height="64">
       <div>
-        <p class="eyebrow">Plume Francaise</p>
-        <h1>Preferences</h1>
+        <p class="eyebrow">Plume Française</p>
+        <h1>Préférences</h1>
       </div>
     </header>
 
     <section aria-labelledby="usage-title">
       <div>
-        <h2 id="usage-title">How to use</h2>
-        <p>Start typing after selecting Plume Française from the input menu. The candidate window updates as you go.</p>
+        <h2 id="usage-title">Mode d'emploi</h2>
+        <p>Commencez à taper après avoir sélectionné Plume Française dans le menu de saisie. La fenêtre des candidats se met à jour au fur et à mesure.</p>
       </div>
       <ul class="usage-list">
-        <li><strong>&uarr; / &darr;</strong> — move through candidates.</li>
-        <li><strong>1&ndash;9</strong> — pick a candidate on the current page directly.</li>
-        <li><strong>Space</strong> — commit the highlighted candidate and insert a trailing space.</li>
-        <li><strong>Return</strong> — commit without adding a space.</li>
-        <li><strong>Escape</strong> — cancel the current composition.</li>
-        <li>Typing <code>;</code>, <code>:</code>, <code>!</code> or <code>?</code> after a word commits it with French spacing automatically.</li>
+        <li><strong>&uarr; / &darr;</strong> — parcourir les candidats.</li>
+        <li><strong>1&ndash;9</strong> — choisir directement un candidat de la page actuelle.</li>
+        <li><strong>Espace</strong> — valider le candidat en surbrillance et insérer un espace à la suite.</li>
+        <li><strong>Retour</strong> — valider sans ajouter d'espace.</li>
+        <li><strong>Échap</strong> — annuler la composition en cours.</li>
+        <li>Taper <code>;</code>, <code>:</code>, <code>!</code> ou <code>?</code> après un mot le valide automatiquement avec l'espacement français.</li>
       </ul>
     </section>
 
     <section aria-labelledby="typing-title">
       <div>
-        <h2 id="typing-title">Typing</h2>
-        <p>Choose how committed candidates behave while writing.</p>
+        <h2 id="typing-title">Saisie</h2>
+        <p>Choisissez comment se comportent les candidats validés pendant la frappe.</p>
       </div>
       <label class="toggle">
         <input id="commitWordWithSpace" type="checkbox">
         <span>
-          <strong>Commit word with Space</strong>
-          <small>Add a space after accepting the current candidate with Space.</small>
+          <strong>Valider le mot avec Espace</strong>
+          <small>Ajoute un espace après avoir validé le candidat actuel avec Espace.</small>
         </span>
       </label>
     </section>
 
     <section aria-labelledby="grammar-title">
       <div>
-        <h2 id="grammar-title">Grammar</h2>
-        <p>French agreement rules depend on your own gender when you're the subject (for example <code>je suis allé</code> vs <code>je suis allée</code>). This only changes suggestions for "je", "tu" and "on" in compound tenses built with être — everything else is unaffected.</p>
+        <h2 id="grammar-title">Grammaire</h2>
+        <p>Les règles d'accord du français dépendent de votre propre genre lorsque vous êtes le sujet (par exemple <code>je suis allé</code> contre <code>je suis allée</code>). Cela ne change les suggestions que pour « je », « tu » et « on » dans les temps composés formés avec être — tout le reste n'est pas concerné.</p>
       </div>
       <label>
-        <span>Your gender, for agreement</span>
+        <span>Votre genre, pour l'accord</span>
         <select id="genderAgreement">
-          <option value="unspecified">Not set (defaults to masculine forms)</option>
-          <option value="masculine">Masculine</option>
-          <option value="feminine">Feminine</option>
+          <option value="unspecified">Non précisé (formes masculines par défaut)</option>
+          <option value="masculine">Masculin</option>
+          <option value="feminine">Féminin</option>
         </select>
       </label>
     </section>
 
     <section aria-labelledby="substitutions-title">
       <div>
-        <h2 id="substitutions-title">Personal substitutions</h2>
-        <p>Add words or phrases Plume Francaise should suggest locally on this Mac.</p>
+        <h2 id="substitutions-title">Substitutions personnelles</h2>
+        <p>Ajoutez des mots ou expressions que Plume Française doit suggérer localement sur ce Mac.</p>
       </div>
 
       <form id="substitutionForm" class="substitution-form">
         <label>
-          <span>Input</span>
+          <span>Entrée</span>
           <input id="substitutionKey" name="key" autocomplete="off" required>
         </label>
         <label>
           <span>Suggestion</span>
           <input id="substitutionValue" name="value" autocomplete="off" required>
         </label>
-        <button type="submit">Add</button>
+        <button type="submit">Ajouter</button>
       </form>
 
       <table>
         <thead>
           <tr>
-            <th>Input</th>
+            <th>Entrée</th>
             <th>Suggestion</th>
             <th><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody id="substitutions"></tbody>
       </table>
-      <p id="emptyState" class="empty">No personal substitutions yet.</p>
+      <p id="emptyState" class="empty">Aucune substitution personnelle pour le moment.</p>
     </section>
 
     <section aria-labelledby="updates-title">
       <div>
-        <h2 id="updates-title">Updates</h2>
-        <p>Plume Francaise never contacts the network on its own. Checking asks GitHub for the latest release and nothing else.</p>
+        <h2 id="updates-title">Mises à jour</h2>
+        <p>Plume Française ne contacte jamais le réseau de lui-même. Vérifier interroge GitHub pour la dernière version, rien d'autre.</p>
       </div>
       <div class="update-row">
-        <button id="checkUpdateButton" type="button">Check for updates</button>
+        <button id="checkUpdateButton" type="button">Vérifier les mises à jour</button>
         <span id="updateStatus"></span>
       </div>
     </section>

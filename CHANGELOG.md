@@ -6,7 +6,9 @@ Toutes les modifications importantes sont documentées dans ce fichier.
 
 ### Ajouts
 
-- Préférence « Grammar » dans la page de préférences pour indiquer son propre genre
+- Page de préférences entièrement en français (elle était passée en anglais lors d'un
+  ajout précédent sans que le changement soit annoncé)
+- Préférence « Grammaire » dans la page de préférences pour indiquer son propre genre
   (masculin, féminin ou non précisé) ; quand « je », « tu » ou « on » est le sujet d'un
   temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
   féminin (`allée`, par exemple) si l'utilisateur l'a demandé — les temps simples et les
