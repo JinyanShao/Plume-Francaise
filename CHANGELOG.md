@@ -8,6 +8,9 @@ Toutes les modifications importantes sont documentées dans ce fichier.
 
 - Page de préférences entièrement en français (elle était passée en anglais lors d'un
   ajout précédent sans que le changement soit annoncé)
+- La première fois que Plume Française est activée, la page de préférences s'ouvre
+  automatiquement sur la section « Mode d'emploi », pour ne pas laisser l'utilisateur
+  découvrir seul le fonctionnement des candidats ; cela ne se produit qu'une seule fois
 - Préférence « Grammaire » dans la page de préférences pour indiquer son propre genre
   (masculin, féminin ou non précisé) ; quand « je », « tu » ou « on » est le sujet d'un
   temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
