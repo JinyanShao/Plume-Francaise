@@ -148,6 +148,18 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                           return [GCDWebServerDataResponse responseWithJSONObject:[engine allSubstitutions]];
                       }];
 
+    [webServer addHandlerForMethod:@"POST"
+                              path:@"/reset-learned-selections"
+                      requestClass:[GCDWebServerRequest class]
+                      processBlock:^GCDWebServerResponse *(GCDWebServerRequest *request) {
+                          if (!RequestHasTrustedOrigin(request))
+                              return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden
+                                                                                message:@"Untrusted origin"];
+
+                          [engine resetLearnedSelections];
+                          return [GCDWebServerDataResponse responseWithJSONObject:@{@"ok" : @YES}];
+                      }];
+
     // The only network request this app ever makes, and only when the user clicks
     // "Check for updates" in the preferences page. Nothing is sent besides the plain
     // HTTPS request GitHub's public releases API requires; no identifying data is included.

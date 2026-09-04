@@ -8,6 +8,8 @@ const emptyState = document.querySelector("#emptyState");
 const statusText = document.querySelector("#status");
 const checkUpdateButton = document.querySelector("#checkUpdateButton");
 const updateStatus = document.querySelector("#updateStatus");
+const resetLearningButton = document.querySelector("#resetLearningButton");
+const resetLearningStatus = document.querySelector("#resetLearningStatus");
 
 function setStatus(message) {
   statusText.textContent = message;
@@ -127,6 +129,18 @@ checkUpdateButton.addEventListener("click", async () => {
     updateStatus.textContent = `Impossible de vérifier les mises à jour : ${error.message}`;
   } finally {
     checkUpdateButton.disabled = false;
+  }
+});
+
+resetLearningButton.addEventListener("click", async () => {
+  resetLearningButton.disabled = true;
+  try {
+    await requestJSON("/reset-learned-selections", { method: "POST" });
+    resetLearningStatus.textContent = "Apprentissage réinitialisé.";
+  } catch (error) {
+    resetLearningStatus.textContent = `Échec de la réinitialisation : ${error.message}`;
+  } finally {
+    resetLearningButton.disabled = false;
   }
 });
 

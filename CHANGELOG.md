@@ -16,6 +16,12 @@ Toutes les modifications importantes sont documentées dans ce fichier.
   préférences ; les deux surfaces partagent le même réglage et restent synchronisées.
   Les intitulés du menu (« Préférences », « À propos ») sont passés en français au
   passage, pour rester cohérents avec le reste
+- Apprentissage personnel : le mot effectivement validé pour une saisie donnée est retenu
+  localement, et proposé en priorité la prochaine fois que la même saisie revient, sans
+  rien à configurer (contrairement aux substitutions manuelles) ; un choix isolé ne suffit
+  pas à l'apprendre, il faut qu'il se répète au moins une fois. Une substitution manuelle
+  reste toujours prioritaire sur un choix appris. Section « Apprentissage personnel » dans
+  la page de préférences pour tout réinitialiser
 - Préférence « Grammaire » dans la page de préférences pour indiquer son propre genre
   (masculin, féminin ou non précisé) ; quand « je », « tu » ou « on » est le sujet d'un
   temps composé avec l'auxiliaire être, le participe proposé s'accorde désormais au
