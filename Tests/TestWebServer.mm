@@ -155,4 +155,21 @@
     XCTAssertTrue([json[@"updateAvailable"] isKindOfClass:NSNumber.class]);
 }
 
+// The success path (a trusted-origin POST actually clearing word_selections) is
+// intentionally not exercised here: this is the same file the shipped app's real learned
+// data lives in when tests run on a machine that also has the app installed, and this
+// suite runs before every commit, so a passing test would silently wipe real accumulated
+// personalization on every run. The Origin check itself is the security-relevant behavior
+// worth locking in; the DELETE statement it guards is covered by manual verification.
+- (void)testResetLearnedSelectionsRequiresTrustedOrigin {
+    NSInteger status = 0;
+    [self performRequest:[self requestWithPath:@"/reset-learned-selections" method:@"POST" origin:nil body:nil] statusCode:&status json:nil];
+    XCTAssertEqual(status, 403);
+
+    NSInteger foreignStatus = 0;
+    NSMutableURLRequest *request = [self requestWithPath:@"/reset-learned-selections" method:@"POST" origin:@"http://evil.example" body:nil];
+    [self performRequest:request statusCode:&foreignStatus json:nil];
+    XCTAssertEqual(foreignStatus, 403);
+}
+
 @end

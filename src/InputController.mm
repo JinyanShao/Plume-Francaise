@@ -234,6 +234,7 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         text = [self originalBuffer];
     }
 
+    [engine recordWordSelection:text forInput:[self originalBuffer]];
     [self recordCommittedWord:text];
 
     BOOL commitWordWithSpace = [preference boolForKey:@"commitWordWithSpace"];
@@ -258,6 +259,7 @@ static const KeyCode KEY_RETURN = 36, KEY_SPACE = 49, KEY_DELETE = 51, KEY_ESC =
         text = [self originalBuffer];
     }
 
+    [engine recordWordSelection:text forInput:[self originalBuffer]];
     [self recordCommittedWord:text];
 
     [sender insertText:text replacementRange:NSMakeRange(NSNotFound, NSNotFound)];

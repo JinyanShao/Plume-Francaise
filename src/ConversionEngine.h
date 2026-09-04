@@ -18,6 +18,9 @@
 - (void)addSubstitution:(NSString *)key value:(NSString *)value;
 - (void)removeSubstitution:(NSString *)key;
 
+- (void)recordWordSelection:(NSString *)word forInput:(NSString *)input;
+- (void)resetLearnedSelections;
+
 // Written from the web server's background queue (add/removeSubstitution) and read from
 // the main thread while typing (getFrenchCandidates:). Keep this atomic (the default) and
 // always replace the whole dictionary rather than mutating it in place, so a reader never

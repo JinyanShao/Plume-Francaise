@@ -597,4 +597,40 @@ extern NSUserDefaults *preference;
     XCTAssertEqual(controller.onboardingShownCount, 1);
 }
 
+// These use a randomized nonsense input so they can't collide with anything a real user
+// would type on a machine that shares this same local substitutions.sqlite3 file (the
+// substitution tests in TestWebServer.mm follow the same convention). The leftover rows
+// are inert - nobody ever actually types "xtestinput12345" - so they're not cleaned up
+// afterward, unlike substitutions which are user-visible in the preferences page.
+- (void)testLearnedSelectionRequiresRepeatedChoiceBeforeInfluencingRanking {
+    NSString *input = [NSString stringWithFormat:@"xtestinput%u", arc4random()];
+    NSString *word = [NSString stringWithFormat:@"xtestword%u", arc4random()];
+
+    XCTAssertEqualObjects([self.engine getFrenchCandidates:input], @[ input ]);
+
+    [self.engine recordWordSelection:word forInput:input];
+    XCTAssertEqualObjects([self.engine getFrenchCandidates:input], @[ input ], @"a single pick shouldn't be learned yet");
+
+    [self.engine recordWordSelection:word forInput:input];
+    NSArray *afterSecondPick = [self.engine getFrenchCandidates:input];
+    XCTAssertEqualObjects(afterSecondPick.firstObject, word);
+    XCTAssertTrue([afterSecondPick containsObject:input]);
+}
+
+- (void)testManualSubstitutionOutranksLearnedSelection {
+    NSString *input = [NSString stringWithFormat:@"xtestinput%u", arc4random()];
+    NSString *learnedWord = [NSString stringWithFormat:@"xtestlearned%u", arc4random()];
+    NSString *substitutionWord = [NSString stringWithFormat:@"xtestsubstitution%u", arc4random()];
+
+    [self.engine recordWordSelection:learnedWord forInput:input];
+    [self.engine recordWordSelection:learnedWord forInput:input];
+    [self.engine addSubstitution:input value:substitutionWord];
+
+    NSArray *forms = [self.engine getFrenchCandidates:input];
+    XCTAssertEqualObjects(forms.firstObject, substitutionWord);
+    XCTAssertTrue([forms containsObject:learnedWord]);
+
+    [self.engine removeSubstitution:input];
+}
+
 @end

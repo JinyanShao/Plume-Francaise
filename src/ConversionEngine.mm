@@ -75,6 +75,10 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
     [_subDbQueue inDatabase:^(FMDatabase *db) {
         if (![db executeUpdate:@"CREATE TABLE IF NOT EXISTS substitutions (key TEXT PRIMARY KEY, value TEXT)"])
             NSLog(@"[PlumeFrancaise] Failed to create substitutions table: %@", db.lastError);
+        if (![db executeUpdate:@"CREATE TABLE IF NOT EXISTS word_selections ("
+                               @"normalized_input TEXT NOT NULL, word TEXT NOT NULL, count INTEGER NOT NULL DEFAULT 0, "
+                               @"PRIMARY KEY (normalized_input, word))"])
+            NSLog(@"[PlumeFrancaise] Failed to create word_selections table: %@", db.lastError);
     }];
 }
 
@@ -425,9 +429,11 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
         elided && (prefixMatches.count == 0 || [elidedInfo[@"frequency"] longLongValue] >= topPrefixMatchFrequency);
     NSArray *conjugations = [self getFrenchConjugations:originalInput maxResults:12];
     NSArray *corrections = hasExactMatch ? @[] : [self getFrenchSpellingCorrections:originalInput maxResults:8];
+    NSArray *learnedSelections = [self learnedSelectionsForInput:originalInput];
     return [self mergeFrenchCandidateGroups:@[
         substitution ? @[ substitution ] : @[],
         exactMatches,
+        learnedSelections,
         elisionLeadsPrefixMatches ? @[ elided ] : @[],
         prefixMatches,
         elided && !elisionLeadsPrefixMatches ? @[ elided ] : @[],
@@ -436,6 +442,28 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
         @[ originalInput ],
     ]
                                   maxResults:50];
+}
+
+// Words the user has repeatedly chosen for this exact input take priority over generic
+// frequency-ranked matches next time, without needing to be configured by hand like a
+// substitution. A single pick isn't enough to act on - that could just as easily be a typo
+// or one-off correction - so this only kicks in once the same (input, word) pair has been
+// chosen at least twice.
+- (NSArray *)learnedSelectionsForInput:(NSString *)input {
+    if (!_subDbQueue || input.length == 0)
+        return @[];
+    NSString *normalizedInput = [self normalizeFrenchText:input];
+    __block NSMutableArray *words = [NSMutableArray array];
+    [_subDbQueue inDatabase:^(FMDatabase *db) {
+        FMResultSet *result = [db executeQuery:@"SELECT word FROM word_selections "
+                                               @"WHERE normalized_input = ? AND count >= 2 "
+                                               @"ORDER BY count DESC LIMIT 3",
+                                               normalizedInput];
+        while ([result next])
+            [words addObject:[result stringForColumn:@"word"]];
+        [result close];
+    }];
+    return words;
 }
 
 - (NSArray *)predictFrenchWordsForContext:(NSString *)context prefixFilter:(NSString *)prefix maxResults:(NSInteger)max {
@@ -509,6 +537,30 @@ static NSString *AvoirPresentWordForSubject(NSString *subject) {
             NSLog(@"[PlumeFrancaise] Failed to remove substitution for %@: %@", normalizedKey, db.lastError);
     }];
     self.substitutions = [self loadSubstitutionsFromDB];
+}
+
+// Called once per commit, from whatever was actually typed towards whatever was actually
+// accepted. Skipped when they're identical - a plain pass-through has nothing to learn from,
+// since the literal typed text is always available as a fallback candidate anyway.
+- (void)recordWordSelection:(NSString *)word forInput:(NSString *)input {
+    if (!_subDbQueue || word.length == 0 || input.length == 0 || [word isEqualToString:input])
+        return;
+    NSString *normalizedInput = [self normalizeFrenchText:input];
+    [_subDbQueue inDatabase:^(FMDatabase *db) {
+        if (![db executeUpdate:@"INSERT INTO word_selections (normalized_input, word, count) VALUES (?, ?, 1) "
+                               @"ON CONFLICT(normalized_input, word) DO UPDATE SET count = count + 1",
+                               normalizedInput, word])
+            NSLog(@"[PlumeFrancaise] Failed to record word selection for %@: %@", normalizedInput, db.lastError);
+    }];
+}
+
+- (void)resetLearnedSelections {
+    if (!_subDbQueue)
+        return;
+    [_subDbQueue inDatabase:^(FMDatabase *db) {
+        if (![db executeUpdate:@"DELETE FROM word_selections"])
+            NSLog(@"[PlumeFrancaise] Failed to reset learned selections: %@", db.lastError);
+    }];
 }
 
 @end
