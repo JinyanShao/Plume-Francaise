@@ -24,7 +24,7 @@ async function requestJSON(url, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new Error(`Échec de la requête : ${response.status}`);
   }
 
   return response.json();
@@ -49,12 +49,12 @@ function renderSubstitutions(substitutions) {
     valueCell.textContent = value;
     removeButton.type = "button";
     removeButton.className = "icon-button";
-    removeButton.textContent = "Remove";
+    removeButton.textContent = "Supprimer";
     removeButton.addEventListener("click", async () => {
       await requestJSON(`/substitutions/${encodeURIComponent(key)}`, {
         method: "DELETE",
       });
-      setStatus("Substitution removed.");
+      setStatus("Substitution supprimée.");
       await loadSubstitutions();
     });
 
@@ -78,7 +78,7 @@ async function savePreference() {
       genderAgreement: genderAgreement.value,
     }),
   });
-  setStatus("Preference saved.");
+  setStatus("Préférence enregistrée.");
 }
 
 async function loadSubstitutions() {
@@ -98,7 +98,7 @@ substitutionForm.addEventListener("submit", async (event) => {
 
   substitutionForm.reset();
   substitutionKey.focus();
-  setStatus("Substitution saved.");
+  setStatus("Substitution enregistrée.");
   await loadSubstitutions();
 });
 
@@ -107,24 +107,24 @@ genderAgreement.addEventListener("change", savePreference);
 
 checkUpdateButton.addEventListener("click", async () => {
   checkUpdateButton.disabled = true;
-  updateStatus.textContent = "Checking…";
+  updateStatus.textContent = "Vérification…";
   try {
     const result = await requestJSON("/update-check", { method: "POST" });
     if (result.updateAvailable) {
       updateStatus.replaceChildren(
-        document.createTextNode(`Version ${result.latestVersion} is available (you have ${result.currentVersion}). `)
+        document.createTextNode(`La version ${result.latestVersion} est disponible (vous avez la ${result.currentVersion}). `)
       );
       const link = document.createElement("a");
       link.href = result.releaseUrl;
       link.target = "_blank";
       link.rel = "noopener";
-      link.textContent = "Open the release page";
+      link.textContent = "Ouvrir la page de version";
       updateStatus.append(link);
     } else {
-      updateStatus.textContent = `You're up to date (${result.currentVersion}).`;
+      updateStatus.textContent = `Vous êtes à jour (${result.currentVersion}).`;
     }
   } catch (error) {
-    updateStatus.textContent = `Couldn't check for updates: ${error.message}`;
+    updateStatus.textContent = `Impossible de vérifier les mises à jour : ${error.message}`;
   } finally {
     checkUpdateButton.disabled = false;
   }
