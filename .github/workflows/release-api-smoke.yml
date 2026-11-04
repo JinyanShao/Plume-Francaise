@@ -1,0 +1,25 @@
+name: Release API smoke test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  github-release-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check GitHub's latest release response
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.request
+
+          request = urllib.request.Request(
+              'https://api.github.com/repos/JinyanShao/Plume-Francaise/releases/latest',
+              headers={'Accept': 'application/vnd.github+json'},
+          )
+          with urllib.request.urlopen(request, timeout=8) as response:
+              release = json.load(response)
+              assert response.status == 200
+              assert isinstance(release.get('tag_name'), str) and release['tag_name']
+              print('Latest release:', release['tag_name'])
+          PY

@@ -1,6 +1,36 @@
 #import "WebServer.h"
 #import <XCTest/XCTest.h>
 
+@interface WebServer (UpdateTest)
+@property(atomic, strong) NSURLSessionConfiguration *updateSessionConfiguration;
+@end
+
+static NSInteger stubStatus;
+static NSData *stubData;
+static NSError *stubError;
+
+@interface UpdateURLProtocol : NSURLProtocol
+@end
+
+@implementation UpdateURLProtocol
++ (BOOL)canInitWithRequest:(NSURLRequest *)request { return YES; }
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request { return request; }
+- (void)startLoading {
+    if (stubError) {
+        [self.client URLProtocol:self didFailWithError:stubError];
+    } else {
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.request.URL
+                                                                statusCode:stubStatus
+                                                               HTTPVersion:@"HTTP/1.1"
+                                                              headerFields:nil];
+        [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+        [self.client URLProtocol:self didLoadData:stubData];
+        [self.client URLProtocolDidFinishLoading:self];
+    }
+}
+- (void)stopLoading {}
+@end
+
 // These exercise the real GCDWebServer instance that main() already starts on
 // localhost:62718 for the app-hosted test target, including the Origin check added
 // to guard the preferences endpoints against CSRF from other localhost web pages.
@@ -140,19 +170,72 @@
     XCTAssertEqual(status, 403);
 }
 
+- (void)tearDown {
+    [WebServer sharedServer].updateSessionConfiguration = nil;
+    stubData = nil;
+    stubError = nil;
+    [super tearDown];
+}
+
+- (void)stubUpdateResponse:(NSString *)body status:(NSInteger)status error:(NSError *)error {
+    stubStatus = status;
+    stubData = [body dataUsingEncoding:NSUTF8StringEncoding];
+    stubError = error;
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+    configuration.protocolClasses = @[ UpdateURLProtocol.class ];
+    [WebServer sharedServer].updateSessionConfiguration = configuration;
+}
+
+- (void)performUpdateCheckWithStatus:(NSInteger *)status json:(NSDictionary **)json {
+    NSMutableURLRequest *request = [self requestWithPath:@"/update-check" method:@"POST" origin:@"http://localhost:62718" body:nil];
+    [self performRequest:request statusCode:status json:json];
+}
+
 - (void)testUpdateCheckWithMatchingOriginReturnsVersionInfo {
-    // Hits the real GitHub releases API, since that's the only network call this app
-    // ever makes and it's worth verifying end-to-end rather than mocking it away.
+    [self stubUpdateResponse:@"{\"tag_name\":\"v9999.2.3\",\"html_url\":\"https://example.com/release\"}" status:200 error:nil];
     NSInteger status = 0;
     NSDictionary *json = nil;
-    NSMutableURLRequest *request = [self requestWithPath:@"/update-check" method:@"POST" origin:@"http://localhost:62718" body:nil];
-    [self performRequest:request statusCode:&status json:&json timeout:15];
+    [self performUpdateCheckWithStatus:&status json:&json];
 
     XCTAssertEqual(status, 200);
     XCTAssertTrue([json[@"currentVersion"] isKindOfClass:NSString.class]);
-    XCTAssertTrue([json[@"latestVersion"] isKindOfClass:NSString.class]);
-    XCTAssertTrue([json[@"releaseUrl"] isKindOfClass:NSString.class]);
-    XCTAssertTrue([json[@"updateAvailable"] isKindOfClass:NSNumber.class]);
+    XCTAssertEqualObjects(json[@"latestVersion"], @"9999.2.3");
+    XCTAssertEqualObjects(json[@"releaseUrl"], @"https://example.com/release");
+    XCTAssertEqualObjects(json[@"updateAvailable"], @YES);
+}
+
+- (void)testUpdateCheckTimeoutReturnsServiceUnavailable {
+    NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil];
+    [self stubUpdateResponse:@"" status:0 error:error];
+    NSInteger status = 0;
+    [self performUpdateCheckWithStatus:&status json:nil];
+    XCTAssertEqual(status, 503);
+}
+
+- (void)testUpdateCheckNon200ReturnsServiceUnavailable {
+    [self stubUpdateResponse:@"{\"tag_name\":\"v9999.2.3\"}" status:403 error:nil];
+    NSInteger status = 0;
+    [self performUpdateCheckWithStatus:&status json:nil];
+    XCTAssertEqual(status, 503);
+}
+
+- (void)testUpdateCheckMalformedResponsesReturnServiceUnavailable {
+    for (NSString *body in @[ @"not json", @"[]", @"{}", @"{\"tag_name\":\"\"}" ]) {
+        [self stubUpdateResponse:body status:200 error:nil];
+        NSInteger status = 0;
+        [self performUpdateCheckWithStatus:&status json:nil];
+        XCTAssertEqual(status, 503, @"body: %@", body);
+    }
+}
+
+- (void)testUpdateCheckHandlesMissingReleaseURL {
+    [self stubUpdateResponse:@"{\"tag_name\":\"v0.0.0\",\"html_url\":42}" status:200 error:nil];
+    NSInteger status = 0;
+    NSDictionary *json = nil;
+    [self performUpdateCheckWithStatus:&status json:&json];
+    XCTAssertEqual(status, 200);
+    XCTAssertEqualObjects(json[@"releaseUrl"], @"https://github.com/JinyanShao/Plume-Francaise/releases");
+    XCTAssertEqualObjects(json[@"updateAvailable"], @NO);
 }
 
 // The success path (a trusted-origin POST actually clearing word_selections) is
