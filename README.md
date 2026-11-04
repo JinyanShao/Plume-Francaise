@@ -151,6 +151,8 @@ bash build.sh
 
 The regression tests cover normalization, accent and apostrophe handling, conjugation ranking, contextual suggestions, candidate selection, and punctuation behavior.
 
+Update-check tests use controlled HTTP responses to cover successful requests, timeouts, non-200 status codes, and malformed data without depending on GitHub availability. The **Release API smoke test** workflow can be run manually in GitHub Actions to check the live GitHub Releases API.
+
 ## Compatibility
 
 - macOS 13.5 or later
