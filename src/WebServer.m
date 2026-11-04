@@ -14,6 +14,7 @@ NSString *GENDER_AGREEMENT_KEY = @"genderAgreement";
 @interface WebServer ()
 
 @property(nonatomic, strong) GCDWebServer *server;
+@property(atomic, strong) NSURLSessionConfiguration *updateSessionConfiguration;
 
 @end
 
@@ -178,7 +179,7 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                        NSURL *url = [NSURL URLWithString:@"https://api.github.com/repos/JinyanShao/Plume-Francaise/releases/latest"];
                        NSMutableURLRequest *githubRequest = [NSMutableURLRequest requestWithURL:url];
                        [githubRequest setValue:@"application/vnd.github+json" forHTTPHeaderField:@"Accept"];
-                       NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration ephemeralSessionConfiguration];
+                       NSURLSessionConfiguration *configuration = self.updateSessionConfiguration ?: [NSURLSessionConfiguration ephemeralSessionConfiguration];
                        configuration.timeoutIntervalForRequest = 8;
                        NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration];
                        NSURLSessionDataTask *task = [session
@@ -190,16 +191,20 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                                                           message:@"Could not reach GitHub: %@", error.localizedDescription ?: @"empty response"]);
                                      return;
                                  }
-                                 NSDictionary *release = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-                                 NSString *tagName = release[@"tag_name"];
-                                 if (![tagName isKindOfClass:NSString.class]) {
+                                 id release = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                                 id tagName = [release isKindOfClass:NSDictionary.class] ? release[@"tag_name"] : nil;
+                                 if (![response isKindOfClass:NSHTTPURLResponse.class] ||
+                                     ((NSHTTPURLResponse *)response).statusCode != 200 ||
+                                     ![tagName isKindOfClass:NSString.class] || [tagName length] == 0) {
                                      completionBlock([GCDWebServerErrorResponse
                                          responseWithServerError:kGCDWebServerHTTPStatusCode_ServiceUnavailable
                                                           message:@"Unexpected response from GitHub"]);
                                      return;
                                  }
                                  NSString *latestVersion = [tagName hasPrefix:@"v"] ? [tagName substringFromIndex:1] : tagName;
-                                 NSString *releaseUrl = release[@"html_url"];
+                                 id releaseUrl = release[@"html_url"];
+                                 if (![releaseUrl isKindOfClass:NSString.class])
+                                     releaseUrl = nil;
                                  completionBlock([GCDWebServerDataResponse responseWithJSONObject:@{
                                      @"currentVersion" : currentVersion,
                                      @"latestVersion" : latestVersion,
@@ -208,6 +213,7 @@ static BOOL VersionIsNewer(NSString *latest, NSString *current) {
                                  }]);
                              }];
                        [task resume];
+                       [session finishTasksAndInvalidate];
                    }];
 
     NSMutableDictionary *options = [NSMutableDictionary dictionary];
